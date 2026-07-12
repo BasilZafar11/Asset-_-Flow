@@ -10,8 +10,8 @@ export function AuthLayout() {
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
       <div className="flex items-center gap-2.5 mb-8">
-        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-primary-600">
-          <Package className="h-5 w-5 text-white" />
+        <div className="flex items-center justify-center h-9 w-9 rounded-lg">
+          <img src="/favicon.png" alt="Logo" className="h-10 w-10" />
         </div>
         <span className="text-xl font-semibold text-neutral-900 tracking-tight">
           AssetFlow
