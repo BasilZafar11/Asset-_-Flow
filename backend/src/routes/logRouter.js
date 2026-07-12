@@ -1,9 +1,24 @@
 import express from 'express';
-import { listLogs } from '../controllers/logController.js';
+import { getActivityLogs, exportActivityLog } from '../controllers/logController.js';
 import { authenticateToken, requireOrganizationContext, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/logs', authenticateToken, requireOrganizationContext, requireRole(['Admin']), listLogs);
+// Export route must be before the parameterized routes
+router.get(
+  '/activity-log/export',
+  authenticateToken,
+  requireOrganizationContext,
+  requireRole(['Admin', 'Asset Manager']),
+  exportActivityLog
+);
+
+router.get(
+  '/activity-log',
+  authenticateToken,
+  requireOrganizationContext,
+  requireRole(['Admin', 'Asset Manager', 'Department Head']),
+  getActivityLogs
+);
 
 export default router;

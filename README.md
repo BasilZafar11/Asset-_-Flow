@@ -230,21 +230,7 @@ npm install
 
 ---
 
-## Configure Environment Variables
 
-Create a `.env` file in the project root.
-
-```env
-PORT=5000
-
-DATABASE_URL=mysql://avnadmin:AVNS_b24HLOzF8Vh-m8wt9b4@bms-devyashrasela-09d7.g.aivencloud.com:26759/defaultdb?ssl-mode=REQUIRED
-
-JWT_SECRET_KEY=your_cryptographic_secret_key_string
-
-JWT_EXPIRE_MINUTES=60
-```
-
----
 
 ## Start the Development Server
 

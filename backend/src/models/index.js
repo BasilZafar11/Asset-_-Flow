@@ -12,6 +12,7 @@ import Booking from './Booking.js';
 import MaintenanceRequest from './MaintenanceRequest.js';
 import AuditCycle from './AuditCycle.js';
 import AuditItem from './AuditItem.js';
+import AuditAuditor from './AuditAuditor.js';
 import TransferRequest from './TransferRequest.js';
 import Notification from './Notification.js';
 import SystemActivityLog from './SystemActivityLog.js';
@@ -74,6 +75,8 @@ Booking.belongsTo(Asset, { foreignKey: 'asset_tag', targetKey: 'tag', as: 'Asset
 
 User.hasMany(Booking, { foreignKey: 'booked_by_user_id', onDelete: 'CASCADE' });
 Booking.belongsTo(User, { foreignKey: 'booked_by_user_id', as: 'BookedBy' });
+Booking.belongsTo(User, { foreignKey: 'approved_by_user_id', as: 'ApprovedBy' });
+Booking.belongsTo(User, { foreignKey: 'rejected_by_user_id', as: 'RejectedBy' });
 
 // 8. Maintenance Requests
 Organization.hasMany(MaintenanceRequest, { foreignKey: 'organization_id', onDelete: 'CASCADE' });
@@ -91,6 +94,13 @@ AuditCycle.belongsTo(Organization, { foreignKey: 'organization_id' });
 
 Department.hasMany(AuditCycle, { foreignKey: 'target_department_id', onDelete: 'CASCADE' });
 AuditCycle.belongsTo(Department, { foreignKey: 'target_department_id', as: 'TargetDepartment' });
+
+AuditCycle.belongsTo(User, { foreignKey: 'created_by', as: 'CreatedBy' });
+AuditCycle.belongsTo(User, { foreignKey: 'closed_by', as: 'ClosedBy' });
+
+AuditCycle.hasMany(AuditAuditor, { foreignKey: 'audit_cycle_id', as: 'Auditors' });
+AuditAuditor.belongsTo(AuditCycle, { foreignKey: 'audit_cycle_id' });
+AuditAuditor.belongsTo(User, { foreignKey: 'user_id', as: 'User' });
 
 AuditCycle.hasMany(AuditItem, { foreignKey: 'audit_cycle_id', onDelete: 'CASCADE' });
 AuditItem.belongsTo(AuditCycle, { foreignKey: 'audit_cycle_id' });
@@ -145,6 +155,7 @@ const db = {
   MaintenanceRequest,
   AuditCycle,
   AuditItem,
+  AuditAuditor,
   TransferRequest,
   Notification,
   SystemActivityLog
@@ -165,6 +176,7 @@ export {
   MaintenanceRequest,
   AuditCycle,
   AuditItem,
+  AuditAuditor,
   TransferRequest,
   Notification,
   SystemActivityLog

@@ -3,6 +3,7 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './config/swagger.js';
 import { sequelize } from './models/index.js';
+import { startBookingScheduler } from './utils/bookingScheduler.js';
 
 // Import routers
 import authRouter from './routes/authRouter.js';
@@ -54,8 +55,11 @@ app.use('/api', reportsRouter);
 export const syncDatabase = async () => {
   try {
     console.log('Syncing Sequelize models with MySQL Database...');
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     console.log('Sequelize database models synchronized successfully!');
+    
+    // Start the scheduled background booking scheduler
+    startBookingScheduler();
 
   } catch (err) {
     console.error('Failed to sync Sequelize database models:', err);
