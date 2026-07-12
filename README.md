@@ -269,12 +269,6 @@ We welcome contributions! Feel free to:
 
 ---
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 <div align="center">
 
 ### Made with love by ZeroLag
