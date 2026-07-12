@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus, Search, Filter, Package, CheckCircle, Wrench, AlertTriangle,
-  LayoutList, LayoutGrid, MoreVertical, Share2, QrCode, Download
+  LayoutList, LayoutGrid, MoreVertical, Share2, QrCode, Download,
+  Edit, Archive, Trash2, RefreshCw
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { Button } from '../components/common/Button'
@@ -56,6 +57,17 @@ export function AssetDirectory() {
   })
   const [registering, setRegistering] = useState(false)
   const [regError, setRegError] = useState('')
+  const [openDropdownId, setOpenDropdownId] = useState(null)
+  const [statusAction, setStatusAction] = useState(null) // { key, asset }
+  const [statusReason, setStatusReason] = useState('')
+  const [changingStatus, setChangingStatus] = useState(false)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClick = () => setOpenDropdownId(null)
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
 
   const fetchAssets = async () => {
     setLoading(true)
@@ -149,6 +161,55 @@ export function AssetDirectory() {
   const allocatedCount = assets.filter(a => a.status === 'Allocated').length
   const maintenanceCount = assets.filter(a => a.status === 'Under Maintenance').length
   const lostCount = assets.filter(a => a.status === 'Lost').length
+
+  const handleStatusChange = async () => {
+    if (!statusAction) return
+    setChangingStatus(true)
+    setRegError('') // Reusing regError for global errors, but better to use a dedicated error or toast. 
+    // We'll just alert on failure.
+
+    const statusMap = {
+      'lost': 'Lost',
+      'retire': 'Retired',
+      'dispose': 'Disposed',
+      'recover': 'Available',
+    }
+    const newStatus = statusMap[statusAction.key]
+
+    try {
+      await api.patch(`/assets/${statusAction.asset.tag}/status`, { status: newStatus, reason: statusReason })
+      setStatusAction(null)
+      setStatusReason('')
+      fetchAssets()
+    } catch (err) {
+      alert(err?.response?.data?.error || 'Failed to change status.')
+    } finally {
+      setChangingStatus(false)
+    }
+  }
+
+  const getStatusActions = (asset) => {
+    if (!asset || !canManage) return []
+    const s = asset.status
+    const actions = []
+    
+    // Always provide Edit
+    actions.push({ key: 'edit', label: 'Edit Asset', icon: Edit, color: 'text-neutral-700 hover:bg-neutral-50' })
+
+    if (s === 'Available' || s === 'Allocated') {
+      actions.push({ key: 'lost', label: 'Mark as Lost', icon: AlertTriangle, color: 'text-red-600 hover:bg-red-50' })
+    }
+    if (s === 'Available' || s === 'Allocated') {
+      actions.push({ key: 'retire', label: 'Retire', icon: Archive, color: 'text-neutral-600 hover:bg-neutral-50' })
+    }
+    if (s === 'Available' || s === 'Retired') {
+      actions.push({ key: 'dispose', label: 'Dispose', icon: Trash2, color: 'text-red-600 hover:bg-red-50' })
+    }
+    if (s === 'Lost') {
+      actions.push({ key: 'recover', label: 'Mark as Recovered', icon: RefreshCw, color: 'text-emerald-600 hover:bg-emerald-50' })
+    }
+    return actions
+  }
 
   return (
     <>
@@ -244,7 +305,7 @@ export function AssetDirectory() {
 
           {/* Table View */}
           {viewMode === 'table' && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[240px]">
               <table className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
                   <tr className="bg-neutral-50 border-b border-neutral-200">
@@ -301,10 +362,39 @@ export function AssetDirectory() {
                         </td>
                         <td className="py-2 px-4 text-sm text-neutral-600">{asset.location || '--'}</td>
                         <td className="py-2 px-4 text-sm text-neutral-600">{asset.CurrentHolder?.name || '—'}</td>
-                        <td className="py-2 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <td className="py-2 px-4 text-right relative" onClick={(e) => e.stopPropagation()}>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setOpenDropdownId(openDropdownId === asset.tag ? null : asset.tag)
+                            }}
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
+                          {openDropdownId === asset.tag && getStatusActions(asset).length > 0 && (
+                            <div className="absolute right-4 top-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-neutral-200 z-50 py-1" onClick={e => e.stopPropagation()}>
+                              {getStatusActions(asset).map(action => (
+                                <button
+                                  key={action.key}
+                                  className={cn("w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors", action.color)}
+                                  onClick={() => {
+                                    setOpenDropdownId(null)
+                                    if (action.key === 'edit') {
+                                      navigate(`/assets/${asset.tag}`) // Redirects to details for editing
+                                    } else {
+                                      setStatusAction({ key: action.key, asset })
+                                    }
+                                  }}
+                                >
+                                  <action.icon className="h-4 w-4" />
+                                  {action.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -336,11 +426,42 @@ export function AssetDirectory() {
                     )}
                     onClick={() => navigate(`/assets/${asset.tag}`)}
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-3 relative">
                       <span className="text-xs font-bold text-primary-600">{asset.tag}</span>
-                      <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border', STATUS_COLORS[asset.status] || '')}>
-                        {asset.status}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border', STATUS_COLORS[asset.status] || '')}>
+                          {asset.status}
+                        </span>
+                        <div className="relative" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded"
+                            onClick={() => setOpenDropdownId(openDropdownId === asset.tag ? null : asset.tag)}
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                          {openDropdownId === asset.tag && getStatusActions(asset).length > 0 && (
+                            <div className="absolute right-0 top-6 mt-1 w-48 bg-white rounded-md shadow-lg border border-neutral-200 z-50 py-1" onClick={e => e.stopPropagation()}>
+                              {getStatusActions(asset).map(action => (
+                                <button
+                                  key={action.key}
+                                  className={cn("w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors", action.color)}
+                                  onClick={() => {
+                                    setOpenDropdownId(null)
+                                    if (action.key === 'edit') {
+                                      navigate(`/assets/${asset.tag}`)
+                                    } else {
+                                      setStatusAction({ key: action.key, asset })
+                                    }
+                                  }}
+                                >
+                                  <action.icon className="h-4 w-4" />
+                                  {action.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <h3 className={cn('text-sm font-semibold text-neutral-900 mb-1', asset.status === 'Disposed' && 'line-through')}>{asset.name}</h3>
                     <p className="text-xs text-neutral-500 mb-2">{asset.Category?.name || 'Uncategorized'}</p>
@@ -444,6 +565,47 @@ export function AssetDirectory() {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Status Change Confirmation Modal */}
+        {statusAction && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] p-4" onClick={() => setStatusAction(null)}>
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 space-y-4">
+                <h3 className="text-base font-semibold text-neutral-900">
+                  {statusAction.key === 'lost' && 'Mark Asset as Lost'}
+                  {statusAction.key === 'retire' && 'Retire Asset'}
+                  {statusAction.key === 'dispose' && 'Dispose Asset'}
+                  {statusAction.key === 'recover' && 'Mark Asset as Recovered'}
+                </h3>
+                <p className="text-sm text-neutral-500">
+                  {statusAction.key === 'lost' && `This will mark "${statusAction.asset.name}" (${statusAction.asset.tag}) as Lost.`}
+                  {statusAction.key === 'retire' && `This will retire "${statusAction.asset.name}" (${statusAction.asset.tag}). It cannot be allocated or booked.`}
+                  {statusAction.key === 'dispose' && `This will permanently mark "${statusAction.asset.name}" (${statusAction.asset.tag}) as Disposed. This cannot be undone.`}
+                  {statusAction.key === 'recover' && `This will mark "${statusAction.asset.name}" (${statusAction.asset.tag}) as Available again.`}
+                </p>
+                {statusAction.key !== 'recover' && (
+                  <div className="space-y-1.5">
+                    <Label>Reason</Label>
+                    <textarea
+                      className="w-full h-20 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none resize-none"
+                      value={statusReason} onChange={(e) => setStatusReason(e.target.value)} placeholder="Provide a reason..."
+                    />
+                  </div>
+                )}
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" onClick={() => setStatusAction(null)}>Cancel</Button>
+                  <Button
+                    onClick={handleStatusChange}
+                    loading={changingStatus}
+                    className={statusAction.key === 'dispose' ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
+                  >
+                    Confirm
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         )}

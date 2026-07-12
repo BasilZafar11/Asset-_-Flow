@@ -103,14 +103,24 @@ export const getCycleDetails = async (req, res) => {
 export const createCycle = async (req, res) => {
   const orgId = req.orgMember.organization_id;
   const { name, target_department_id, start_date, end_date } = req.body;
+  const targetDeptId = target_department_id || req.body.department_id;
 
-  if (!name || !target_department_id || !start_date || !end_date) {
+  if (!name || !targetDeptId || !start_date || !end_date) {
     return res.status(400).json({ error: 'Name, target department ID, start date, and end date are required.' });
+  }
+
+  // Prevent past dates
+  const todayStr = new Date().toISOString().split('T')[0];
+  if (start_date < todayStr) {
+    return res.status(400).json({ error: 'Start date cannot be in the past.' });
+  }
+  if (end_date < start_date) {
+    return res.status(400).json({ error: 'End date must be on or after the start date.' });
   }
 
   try {
     const dept = await Department.findOne({
-      where: { id: target_department_id, organization_id: orgId }
+      where: { id: targetDeptId, organization_id: orgId }
     });
     if (!dept) {
       return res.status(400).json({ error: 'Target department not found in this organization.' });
@@ -119,7 +129,7 @@ export const createCycle = async (req, res) => {
     const cycle = await AuditCycle.create({
       organization_id: orgId,
       name,
-      target_department_id,
+      target_department_id: targetDeptId,
       start_date,
       end_date,
       status: 'Draft',

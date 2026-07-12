@@ -83,15 +83,30 @@ export function AuditCycles() {
       setCreateError('Cycle name is required.')
       return
     }
+    if (!createForm.department_id) {
+      setCreateError('Target department is required.')
+      return
+    }
     if (!createForm.start_date || !createForm.end_date) {
       setCreateError('Start and end dates are required.')
       return
     }
+
+    const todayStr = new Date().toISOString().split('T')[0]
+    if (createForm.start_date < todayStr) {
+      setCreateError('Start date cannot be in the past.')
+      return
+    }
+    if (createForm.end_date < createForm.start_date) {
+      setCreateError('End date must be on or after start date.')
+      return
+    }
+
     setCreating(true)
     try {
       await api.post('/audit/cycles', {
         name: createForm.name,
-        department_id: createForm.department_id || null,
+        target_department_id: createForm.department_id,
         start_date: createForm.start_date,
         end_date: createForm.end_date,
       })
@@ -282,13 +297,13 @@ export function AuditCycles() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Target Department</Label>
+                  <Label required>Target Department</Label>
                   <select
                     className="w-full h-9 rounded-md border border-neutral-300 bg-white px-3 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none"
                     value={createForm.department_id}
                     onChange={(e) => setCreateForm((p) => ({ ...p, department_id: e.target.value }))}
                   >
-                    <option value="">All Departments</option>
+                    <option value="">Select a department...</option>
                     {departments.map((d) => (
                       <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
