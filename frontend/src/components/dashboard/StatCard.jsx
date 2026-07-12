@@ -38,7 +38,7 @@ const COLOR_MAP = {
   },
 }
 
-export function StatCard({ label, value, icon: Icon, color = 'blue', onClick }) {
+export function StatCard({ label, value, icon: Icon, color = 'blue', onClick, substat }) {
   const palette = COLOR_MAP[color] || COLOR_MAP.blue
 
   return (
@@ -60,13 +60,20 @@ export function StatCard({ label, value, icon: Icon, color = 'blue', onClick }) 
       >
         <Icon className={cn('h-5 w-5', palette.icon)} />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider truncate">
           {label}
         </p>
-        <p className={cn('text-2xl font-semibold tracking-tight mt-0.5', palette.value)}>
-          {value}
-        </p>
+        <div className="flex items-baseline gap-2 mt-0.5 flex-wrap">
+          <p className={cn('text-2xl font-semibold tracking-tight', palette.value)}>
+            {value}
+          </p>
+          {substat && (
+            <p className="text-xs text-neutral-400 font-normal truncate">
+              {substat}
+            </p>
+          )}
+        </div>
       </div>
     </button>
   )

@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Asset, Booking, TransferRequest, Allocation, SystemActivityLog, User, OrganizationMember, MaintenanceRequest } from '../models/index.js';
+import { sequelize, AssetCategory, Asset, Booking, TransferRequest, Allocation, SystemActivityLog, User, OrganizationMember, MaintenanceRequest } from '../models/index.js';
 
 // Helper to calculate days overdue
 const getDaysOverdue = (expectedDate) => {
@@ -24,7 +24,9 @@ export const getDashboard = async (req, res) => {
         maintenanceCount,
         bookingsCount,
         transfersCount,
-        upcomingCount
+        upcomingCount,
+        categoryDist,
+        allocationsTrend
       ] = await Promise.all([
         Asset.count({ where: { organization_id: orgId, status: 'Available' } }),
         Asset.count({ where: { organization_id: orgId, status: 'Allocated' } }),
@@ -37,6 +39,27 @@ export const getDashboard = async (req, res) => {
             status: 'Active',
             expected_return_date: { [Op.gte]: today }
           }
+        }),
+        Asset.findAll({
+          attributes: [
+            'category_id',
+            [sequelize.fn('COUNT', sequelize.col('Asset.id')), 'count']
+          ],
+          where: { organization_id: orgId },
+          group: ['category_id'],
+          include: [{ model: AssetCategory, as: 'Category', attributes: ['name'] }]
+        }),
+        Allocation.findAll({
+          attributes: [
+            [sequelize.fn('DATE', sequelize.col('created_at')), 'date'],
+            [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+          ],
+          where: {
+            organization_id: orgId,
+            created_at: { [Op.gte]: new Date(new Date() - 30 * 24 * 60 * 60 * 1000) }
+          },
+          group: [sequelize.fn('DATE', sequelize.col('created_at'))],
+          order: [[sequelize.fn('DATE', sequelize.col('created_at')), 'ASC']]
         })
       ]);
 
@@ -76,6 +99,16 @@ export const getDashboard = async (req, res) => {
         created_at: l.created_at
       }));
 
+      const category_distribution = categoryDist.map(c => ({
+        name: c.Category?.name || 'Uncategorized',
+        count: parseInt(c.getDataValue('count'), 10) || 0
+      }));
+
+      const allocations_over_time = allocationsTrend.map(a => ({
+        date: a.getDataValue('date'),
+        count: parseInt(a.getDataValue('count'), 10) || 0
+      }));
+
       return res.json({
         kpis: {
           assets_available: availableCount,
@@ -88,20 +121,16 @@ export const getDashboard = async (req, res) => {
         overdue_returns,
         overdue_count: overdue_returns.length,
         recent_activity,
-        quick_actions: [
-          "register_asset",
-          "book_resource",
-          "raise_maintenance",
-          "create_audit",
-          "invite_member"
-        ]
+        category_distribution,
+        allocations_over_time,
+        quick_actions: []
       });
     } else {
-      // 2. Employee Dashboard Payload (Standard Employee / Dept Head)
       const [
         myAssetsCount,
         maintCount,
-        myBookingsCount
+        myBookingsCount,
+        availableCount
       ] = await Promise.all([
         Asset.count({ where: { organization_id: orgId, current_holder_id: req.user.id } }),
         MaintenanceRequest.count({
@@ -117,7 +146,8 @@ export const getDashboard = async (req, res) => {
             booked_by_user_id: req.user.id,
             status: { [Op.in]: ['Upcoming', 'Ongoing'] }
           }
-        })
+        }),
+        Asset.count({ where: { organization_id: orgId, status: 'Available' } })
       ]);
 
       const overdueAllocations = await Allocation.findAll({
@@ -162,15 +192,13 @@ export const getDashboard = async (req, res) => {
         kpis: {
           my_assets: myAssetsCount,
           maintenance_today: maintCount,
-          my_active_bookings: myBookingsCount
+          my_active_bookings: myBookingsCount,
+          assets_available: availableCount
         },
         overdue_returns,
         overdue_count: overdue_returns.length,
         recent_activity,
-        quick_actions: [
-          "book_resource",
-          "raise_maintenance"
-        ]
+        quick_actions: []
       });
     }
   } catch (err) {

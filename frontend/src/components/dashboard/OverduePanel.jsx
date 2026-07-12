@@ -7,9 +7,18 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 export function OverduePanel({ items = [], overdueCount = 0 }) {
   if (items.length === 0) {
     return (
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 flex items-center gap-3">
-        <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-        <p className="text-sm font-medium text-emerald-700">No overdue returns 🎉</p>
+      <div className="rounded-lg border border-neutral-200 bg-white overflow-hidden flex flex-col h-full min-h-[300px]">
+        <div className="px-4 py-3 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-neutral-500" />
+            <h3 className="text-sm font-semibold text-neutral-700">Overdue Returns</h3>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <CheckCircle2 className="h-12 w-12 text-emerald-500 mb-3" />
+          <p className="text-sm font-semibold text-neutral-800">All assets returned on time</p>
+          <p className="text-xs text-neutral-500 mt-1">No outstanding overdue check-outs.</p>
+        </div>
       </div>
     )
   }
