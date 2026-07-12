@@ -59,8 +59,8 @@ export function Sidebar() {
       {/* Logo */}
       <div className="px-5 py-4 border-b border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary-600">
-            <Package className="h-4 w-4 text-white" />
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg">
+            <img src="/favicon.png" alt="Logo" className="h-8 w-8" />
           </div>
           <span className="text-base font-semibold tracking-tight">AssetFlow</span>
         </div>
