@@ -146,14 +146,6 @@ export const updateMember = async (req, res) => {
     return res.status(400).json({ error: 'Invalid user ID parameter.' });
   }
 
-  // Prevent self-demotion or self-deactivation if owner
-  if (targetUserId === req.user.id) {
-    const org = await Organization.findByPk(orgId);
-    if (org && org.created_by === req.user.id && (status === 'Inactive' || role !== 'Admin')) {
-      return res.status(400).json({ error: 'As the Workspace Owner, you cannot demote yourself from Admin or deactivate your account.' });
-    }
-  }
-
   try {
     const member = await OrganizationMember.findOne({
       where: { organization_id: orgId, user_id: targetUserId }
@@ -161,6 +153,41 @@ export const updateMember = async (req, res) => {
 
     if (!member) {
       return res.status(404).json({ error: 'Member not found in this organization.' });
+    }
+
+    // 1. Self-demotion/deactivation block (Prevents Admin/Owner lockout)
+    if (targetUserId === req.user.id) {
+      if (role !== undefined && role !== member.role) {
+        return res.status(409).json({ error: 'You cannot change your own role.' });
+      }
+      if (status !== undefined && status !== member.status) {
+        return res.status(409).json({ error: 'You cannot change your own status.' });
+      }
+    }
+
+    // 2. Demotion Guard: Department Head -> Employee
+    if (role === 'Employee' && member.role === 'Department Head') {
+      const headOfDept = await Department.findOne({
+        where: { head_user_id: targetUserId, organization_id: orgId, status: 'Active' }
+      });
+      if (headOfDept) {
+        return res.status(409).json({ error: `Cannot demote: user is still Department Head of ${headOfDept.name}. Remove them as head first.` });
+      }
+    }
+
+    // 3. Last Admin Guard: Cannot demote or deactivate the last Active Admin
+    if ((role !== undefined && role !== 'Admin' && member.role === 'Admin') || 
+        (status === 'Inactive' && member.status === 'Active' && member.role === 'Admin')) {
+      const activeAdminsCount = await OrganizationMember.count({
+        where: {
+          organization_id: orgId,
+          role: 'Admin',
+          status: 'Active'
+        }
+      });
+      if (activeAdminsCount <= 1) {
+        return res.status(409).json({ error: 'Cannot demote or suspend the last active Admin in this organization.' });
+      }
     }
 
     if (department_id !== undefined && department_id !== null) {
@@ -172,13 +199,30 @@ export const updateMember = async (req, res) => {
       }
     }
 
+    const oldRole = member.role;
+    const oldStatus = member.status;
+
     if (role !== undefined) member.role = role;
     if (status !== undefined) member.status = status;
     if (department_id !== undefined) member.department_id = department_id;
 
     await member.save();
 
-    await logActivity(orgId, req.user.id, 'UPDATE_MEMBER', `Updated member (ID: ${targetUserId}) profile details`);
+    // Log corresponding activity types
+    let actionType = 'UPDATE_MEMBER';
+    let activityDesc = `Updated member (ID: ${targetUserId}) profile details`;
+    if (role !== undefined && role !== oldRole) {
+      actionType = 'ROLE_UPDATED';
+      activityDesc = `Updated member role from ${oldRole} to ${role}`;
+    } else if (status === 'Inactive' && oldStatus === 'Active') {
+      actionType = 'USER_SUSPENDED';
+      activityDesc = `Suspended member (ID: ${targetUserId}) from the workspace`;
+    } else if (status === 'Active' && oldStatus === 'Inactive') {
+      actionType = 'USER_REACTIVATED';
+      activityDesc = `Reactivated member (ID: ${targetUserId}) in the workspace`;
+    }
+
+    await logActivity(orgId, req.user.id, actionType, activityDesc);
     await createNotification(orgId, targetUserId, 'Profile Updated', 'Your workspace profile role or department has been updated.');
 
     return res.json({ message: 'Member updated successfully.', member });
@@ -187,3 +231,14 @@ export const updateMember = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error updating member.' });
   }
 };
+
+export const suspendMember = async (req, res) => {
+  req.body = { status: 'Inactive' };
+  return updateMember(req, res);
+};
+
+export const reactivateMember = async (req, res) => {
+  req.body = { status: 'Active' };
+  return updateMember(req, res);
+};
+
