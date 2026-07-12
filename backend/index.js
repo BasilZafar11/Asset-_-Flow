@@ -1,20 +1,19 @@
 import dotenv from 'dotenv';
-
-import app from "./src/server.js";
-
 dotenv.config();
+
+import app, { syncDatabase } from "./src/server.js";
 
 const port = process.env.PORT || 3000;
 
 const startServer = async () => {
-    try{
-        // await seedModel();
-        app.listen(port,()=>{
+    try {
+        await syncDatabase();
+        app.listen(port, () => {
             console.log(`This app is listening on port: ${port}`);
-        })
+        });
     }
-    catch(err){
-        console.log("error: ",error.message);
+    catch (err) {
+        console.log("error: ", err.message);
     }
 };
 

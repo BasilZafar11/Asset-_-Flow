@@ -16,8 +16,8 @@ venv/
 *.db
 *.sqlite3
 
-# Node / React Frontend dependencies
-frontend/node_modules/
+# Node dependencies
+node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/*.local
