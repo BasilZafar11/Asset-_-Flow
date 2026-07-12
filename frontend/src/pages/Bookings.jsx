@@ -31,18 +31,18 @@ export function Bookings() {
   // Fetch base categories, departments, and members metadata
   const fetchMetadata = async () => {
     try {
-      const cats = await api.get('/api/categories');
+      const { data: cats } = await api.get('/categories');
       setCategories(cats);
-      const depts = await api.get('/api/departments');
+      const { data: depts } = await api.get('/departments');
       setDepartments(depts);
       
       const isManager = ['Admin', 'Asset Manager'].includes(currentRole);
       if (isManager) {
-        const membersList = await api.get('/api/org/members');
+        const { data: membersList } = await api.get('/org/members');
         setOrgMembers(membersList);
         
         // Fetch pending count for badges
-        const pendingList = await api.get('/api/bookings/approvals');
+        const { data: pendingList } = await api.get('/bookings/approvals');
         setPendingCount(pendingList.length);
       }
     } catch (err) {
@@ -69,7 +69,7 @@ export function Bookings() {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (catFilter) params.append('category_id', catFilter);
-      const data = await api.get(`/api/bookings/resources?${params.toString()}`);
+      const { data } = await api.get(`/bookings/resources?${params.toString()}`);
       setResources(data);
     } catch (err) {
       console.error(err);
@@ -110,7 +110,7 @@ export function Bookings() {
     if (view !== 'calendar' || !assetTag) return;
     try {
       // Load selected asset details
-      const assetData = await api.get(`/api/assets/${assetTag}`);
+      const { data: assetData } = await api.get(`/assets/${assetTag}`);
       setActiveAsset(assetData);
 
       // Determine date boundary
@@ -122,7 +122,7 @@ export function Bookings() {
       }
       endBound.setHours(23, 59, 59, 999);
 
-      const data = await api.get(`/api/bookings`, {
+      const { data } = await api.get(`/bookings`, {
         params: {
           asset_tag: assetTag,
           date_from: startBound.toISOString(),
@@ -191,7 +191,7 @@ export function Bookings() {
     setFormLoading(true);
 
     try {
-      await api.post('/api/bookings', {
+      await api.post('/bookings', {
         asset_tag: assetTag,
         start_time: new Date(bookingStart).toISOString(),
         end_time: new Date(bookingEnd).toISOString(),
@@ -211,7 +211,7 @@ export function Bookings() {
   const handleApproveBooking = async (bookingId) => {
     if (!window.confirm('Are you sure you want to approve this request?')) return;
     try {
-      await api.patch(`/api/bookings/${bookingId}/approve`);
+      await api.patch(`/bookings/${bookingId}/approve`);
       setShowDetailDrawer(false);
       fetchCalendarBookings();
       fetchPendingRequests();
@@ -225,7 +225,7 @@ export function Bookings() {
     e.preventDefault();
     if (!rejectionReason.trim()) return;
     try {
-      await api.patch(`/api/bookings/${activeBooking.id}/reject`, { reason: rejectionReason });
+      await api.patch(`/bookings/${activeBooking.id}/reject`, { reason: rejectionReason });
       setShowRejectModal(false);
       setRejectionReason('');
       setShowDetailDrawer(false);
@@ -240,7 +240,7 @@ export function Bookings() {
   const handleWithdrawRequest = async (bookingId) => {
     if (!window.confirm('Are you sure you want to withdraw your booking request?')) return;
     try {
-      await api.patch(`/api/bookings/${bookingId}/withdraw`);
+      await api.patch(`/bookings/${bookingId}/withdraw`);
       setShowDetailDrawer(false);
       fetchCalendarBookings();
       fetchMyBookingsList();
@@ -253,7 +253,7 @@ export function Bookings() {
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) return;
     try {
-      await api.patch(`/api/bookings/${bookingId}/cancel`);
+      await api.patch(`/bookings/${bookingId}/cancel`);
       setShowDetailDrawer(false);
       fetchCalendarBookings();
       fetchMyBookingsList();
@@ -267,7 +267,7 @@ export function Bookings() {
     setFormError('');
     setFormLoading(true);
     try {
-      await api.patch(`/api/bookings/${activeBooking.id}/reschedule`, {
+      await api.patch(`/bookings/${activeBooking.id}/reschedule`, {
         start_time: new Date(bookingStart).toISOString(),
         end_time: new Date(bookingEnd).toISOString()
       });
@@ -305,7 +305,7 @@ export function Bookings() {
     if (view !== 'approvals') return;
     setLoading(true);
     try {
-      const data = await api.get('/api/bookings/approvals');
+      const { data } = await api.get('/bookings/approvals');
       setApprovalsQueue(data);
     } catch (err) {
       console.error(err);
@@ -327,7 +327,7 @@ export function Bookings() {
     if (view !== 'my') return;
     setLoading(true);
     try {
-      const data = await api.get('/api/bookings/my');
+      const { data } = await api.get('/bookings/my');
       setMyBookings(data);
     } catch (err) {
       console.error(err);

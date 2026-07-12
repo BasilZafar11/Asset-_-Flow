@@ -50,7 +50,7 @@ export function Maintenance() {
       if (statusFilter) params.append('status', statusFilter);
       if (priorityFilter) params.append('priority', priorityFilter);
       if (assetSearch) params.append('asset_tag', assetSearch);
-      const data = await api.get(`/api/maintenance?${params.toString()}`);
+      const { data } = await api.get(`/maintenance?${params.toString()}`);
       setRequests(data);
     } catch (err) {
       console.error('Error fetching maintenance requests:', err);
@@ -67,7 +67,7 @@ export function Maintenance() {
   const openDetail = async (req) => {
     setActiveRequest(req);
     try {
-      const data = await api.get(`/api/maintenance/${req.id}`);
+      const { data } = await api.get(`/maintenance/${req.id}`);
       setDetailData(data);
       setShowDetailDrawer(true);
     } catch (err) {
@@ -83,7 +83,7 @@ export function Maintenance() {
     setFormError('');
     setFormLoading(true);
     try {
-      await api.post('/api/maintenance', {
+      await api.post('/maintenance', {
         asset_tag: raiseAssetTag.trim(),
         issue_description: raiseDescription,
         priority: raisePriority,
@@ -105,7 +105,7 @@ export function Maintenance() {
   const handleApprove = async (id) => {
     if (!window.confirm('Approve this maintenance request? The asset will be marked Under Maintenance.')) return;
     try {
-      await api.patch(`/api/maintenance/${id}/approve`);
+      await api.patch(`/maintenance/${id}/approve`);
       setShowDetailDrawer(false);
       fetchRequests();
     } catch (err) {
@@ -116,7 +116,7 @@ export function Maintenance() {
   const handleRejectSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.patch(`/api/maintenance/${activeRequest.id}/reject`, { reason: rejectReason });
+      await api.patch(`/maintenance/${activeRequest.id}/reject`, { reason: rejectReason });
       setShowRejectModal(false);
       setRejectReason('');
       setShowDetailDrawer(false);
@@ -130,7 +130,7 @@ export function Maintenance() {
     e.preventDefault();
     if (!techName.trim()) return;
     try {
-      await api.patch(`/api/maintenance/${activeRequest.id}/start`, {
+      await api.patch(`/maintenance/${activeRequest.id}/start`, {
         technician_name: techName,
         notes: techNotes
       });
@@ -146,7 +146,7 @@ export function Maintenance() {
 
   const handleResolve = async () => {
     try {
-      await api.patch(`/api/maintenance/${activeRequest.id}/resolve`);
+      await api.patch(`/maintenance/${activeRequest.id}/resolve`);
       setShowResolveConfirm(false);
       setShowDetailDrawer(false);
       fetchRequests();
