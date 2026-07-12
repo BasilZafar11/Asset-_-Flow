@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maintenance Management - AssetFlow ERP</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#004884",
+                        "on-surface": "#1b1c1c",
+                        "surface-container": "#efeded",
+                        "tertiary-container": "#b85203",
+                        "surface-bright": "#fbf9f9",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#0070d2",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#331100",
+                        "tertiary-fixed": "#ffdbca",
+                        "on-primary-fixed": "#001b3b",
+                        "primary": "#0058a7",
+                        "surface": "#fbf9f9",
+                        "secondary-fixed-dim": "#a4c9ff",
+                        "on-primary-container": "#f3f5ff",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#923f00",
+                        "on-secondary-fixed": "#001c39",
+                        "background": "#fbf9f9",
+                        "primary-fixed": "#d5e3ff",
+                        "surface-container-highest": "#e3e2e2",
+                        "secondary": "#005fac",
+                        "outline-variant": "#c1c6d5",
+                        "on-secondary-container": "#003665",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb68f",
+                        "on-tertiary-container": "#fff3ee",
+                        "on-error": "#ffffff",
+                        "outline": "#717784",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#1b1c1c",
+                        "surface-container-low": "#f5f3f3",
+                        "on-tertiary-fixed-variant": "#773200",
+                        "on-surface-variant": "#414753",
+                        "inverse-on-surface": "#f2f0f0",
+                        "secondary-fixed": "#d4e3ff",
+                        "surface-container-high": "#e9e8e7",
+                        "surface-dim": "#dbdad9",
+                        "primary-fixed-dim": "#a7c8ff",
+                        "secondary-container": "#4fa0ff",
+                        "on-primary-fixed-variant": "#004788",
+                        "inverse-primary": "#a7c8ff",
+                        "surface-tint": "#005eb2",
+                        "inverse-surface": "#303031",
+                        "surface-variant": "#e3e2e2",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "tab-bar-height": "40px",
+                        "lg": "24px",
+                        "margin-page": "24px",
+                        "sm": "8px",
+                        "sidebar-width": "240px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "unit": "4px",
+                        "header-height": "56px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "code": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "code": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .kanban-col {
+                @apply flex flex-col gap-sm min-w-[280px] w-[280px] p-sm bg-surface-container-lowest rounded-lg border border-outline-variant/50 h-[calc(100vh-140px)] overflow-y-auto;
+            }
+            .kanban-card {
+                @apply bg-surface border border-outline-variant rounded p-md shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing flex flex-col gap-sm;
+            }
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-label-md text-label-md docked full-width top-0 border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center h-header-height px-lg w-full sticky top-0 z-50">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">AssetFlow ERP</span>
+</div>
+<div class="flex items-center gap-md">
+<!-- Search on left of actions as per JSON -->
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="pl-xl pr-sm py-sm bg-surface-container border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary w-64 font-body-sm text-on-surface outline-none transition-all" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-sm text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-full cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+</button>
+<button class="p-sm text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-full cursor-pointer active:opacity-80 relative">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-sm text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-full cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+</div>
+<div class="ml-sm w-8 h-8 rounded-full overflow-hidden border border-outline-variant cursor-pointer">
+<img alt="Professional user avatar" class="w-full h-full object-cover" data-alt="A professional user avatar portrait of a business executive in a modern bright corporate setting, high key lighting, crisp focus, neutral background, photorealistic style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_cbMF-538lm8qanrbHrt6fhMxbHS5YiFnOMyYeLtaIENwqGYQfYdETKkNx2qJZBOqzdYx6cAeF8H6RBRD9pzH5durAufZ7VhUAPzPi3tqlZ2nvfo0GLThgBLRiFF1I_hIeMPDBT-0a7sPe8fAA7b9KtQ1SB5ac-7S_nPzaYBtEyYAgzcfqyD0u26oCGLZmZEbZ47AUIXFzVLvr0D3281bDX90ajefGskWQgxMlJn6BaFPWZyfwkyWAdRBjl_bPCqJRdJ7S11hF-o"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<nav class="hidden md:flex bg-surface-container-lowest dark:bg-surface-container-high text-primary dark:text-primary-fixed-dim font-label-md text-label-md w-sidebar-width h-screen sticky left-0 border-r border-outline-variant flat no shadows flex-col h-full overflow-y-auto">
+<div class="p-lg border-b border-outline-variant flex items-center gap-sm">
+<div class="w-10 h-10 bg-primary-container rounded flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<div>
+<h2 class="font-label-md text-label-md font-bold text-on-surface">AssetFlow ERP</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Suite</p>
+</div>
+</div>
+<div class="p-md">
+<button class="w-full bg-primary text-on-primary py-sm px-md rounded flex items-center justify-center gap-sm font-label-md hover:bg-surface-tint transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Record
+                </button>
+</div>
+<ul class="flex-1 py-sm flex flex-col gap-xs px-sm">
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-r-full text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                        Dashboard
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-r-full text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">corporate_fare</span>
+                        Organization
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-r-full text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+                        Assets
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-r-full text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">swap_horiz</span>
+                        Allocation
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-r-full text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">event_available</span>
+                        Resource Booking
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-r-full bg-secondary-container dark:bg-secondary text-on-secondary-container border-l-4 border-primary font-bold transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">build</span>
+                        Maintenance
+                    </a>
+</li>
+</ul>
+<div class="mt-auto border-t border-outline-variant py-sm px-sm flex flex-col gap-xs">
+<a class="flex items-center gap-md px-md py-sm rounded-r-full text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+                    Reports
+                </a>
+<a class="flex items-center gap-md px-md py-sm rounded-r-full text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+                    Notifications
+                </a>
+</div>
+</nav>
+<!-- Main Workspace (Canvas) -->
+<main class="flex-1 flex flex-col overflow-hidden bg-background">
+<!-- Workspace Header -->
+<div class="px-margin-page py-md border-b border-outline-variant bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-md shrink-0">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Maintenance Management</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Track and resolve asset repairs across the organization.</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-md py-sm border border-outline text-primary rounded font-label-md hover:bg-surface-container-low transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filter
+                    </button>
+<button class="px-md py-sm bg-primary text-on-primary rounded font-label-md hover:bg-surface-tint transition-colors flex items-center gap-xs shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        Log Issue
+                    </button>
+</div>
+</div>
+<!-- Kanban Board Area -->
+<div class="flex-1 overflow-x-auto overflow-y-hidden p-margin-page">
+<div class="flex gap-gutter h-full">
+<!-- Column: Pending -->
+<div class="kanban-col">
+<div class="flex items-center justify-between px-xs py-sm border-b border-outline-variant/30 mb-sm shrink-0">
+<h3 class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                                Pending
+                                <span class="bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-full font-label-sm ml-sm">2</span>
+</h3>
+<button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+<!-- Card 1 -->
+<div class="kanban-card border-l-4 border-l-error">
+<div class="flex justify-between items-start">
+<span class="font-code text-code text-on-surface-variant bg-surface-container-low px-1 rounded">AF-0062</span>
+<span class="material-symbols-outlined text-[16px] text-error" title="High Priority">priority_high</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Projector bulb</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Not turning on. Bulb likely blown, requested urgent replacement for Boardroom A.</p>
+</div>
+<div class="mt-auto pt-sm flex justify-between items-center border-t border-outline-variant/30">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                    2 hrs ago
+                                </span>
+<div class="w-6 h-6 rounded-full bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A small generic avatar placeholder showing a simple silouhette of a person in light grey on a slightly darker grey background, minimalist vector style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG_n5xKz4KJonoNPUHCriHnv1jhTGja6xQHltbbDqNw8jHUMRmmRg4M4CcwG605Xk5hAYmD9wiWR9JYT3NMalEf7hF2FfIv8hhQQjTg5V0RPo-Gsf17q6kUGMbz5s4x5vUVd_PdiqZ7f-b774dr7xmHDQTRm64UK9GOQv7PcyOwdPFen-N_-ieadRbhGZ7T-XmtiC5zxbKYRlRUWttzre9K8tx9F4b4LsG-aobXp9OS4JqFih-lLKtcRf5pDYhHsmpeTwbITrEUR8"/>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="kanban-card border-l-4 border-l-tertiary">
+<div class="flex justify-between items-start">
+<span class="font-code text-code text-on-surface-variant bg-surface-container-low px-1 rounded">AF-0129</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary" title="Medium Priority">warning</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Dell Laptop (P. Shah)</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Overheating issues reported during heavy compilation tasks.</p>
+</div>
+<div class="mt-auto pt-sm flex justify-between items-center border-t border-outline-variant/30">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                    5 hrs ago
+                                </span>
+</div>
+</div>
+</div>
+<!-- Column: Approved -->
+<div class="kanban-col">
+<div class="flex items-center justify-between px-xs py-sm border-b border-outline-variant/30 mb-sm shrink-0">
+<h3 class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                                Approved
+                                <span class="bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-full font-label-sm ml-sm">1</span>
+</h3>
+<button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+<!-- Card 3 -->
+<div class="kanban-card border-l-4 border-l-outline-variant">
+<div class="flex justify-between items-start">
+<span class="font-code text-code text-on-surface-variant bg-surface-container-low px-1 rounded">AF-0011</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">AC Unit - East Wing</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Noisy compressor. Approval granted for external vendor inspection.</p>
+</div>
+<div class="mt-auto pt-sm flex justify-between items-center border-t border-outline-variant/30">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                    App: J. Doe
+                                </span>
+</div>
+</div>
+</div>
+<!-- Column: Technician Assigned -->
+<div class="kanban-col bg-secondary-fixed/30 border-secondary-fixed-dim/50">
+<div class="flex items-center justify-between px-xs py-sm border-b border-outline-variant/30 mb-sm shrink-0">
+<h3 class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                                Technician Assigned
+                                <span class="bg-primary text-on-primary px-2 py-0.5 rounded-full font-label-sm ml-sm">1</span>
+</h3>
+<button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+<!-- Card 4 -->
+<div class="kanban-card border-l-4 border-l-primary ring-1 ring-primary/20">
+<div class="flex justify-between items-start">
+<span class="font-code text-code text-on-surface-variant bg-surface-container-low px-1 rounded">AF-0078</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Forklift (Warehouse)</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Hydraulic fluid leak detected during morning inspection.</p>
+</div>
+<div class="bg-primary-container/10 p-2 rounded mt-2 flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-sm">RV</div>
+<span class="font-label-sm text-on-surface">Tech: R. Varma</span>
+</div>
+</div>
+</div>
+<!-- Column: In Progress -->
+<div class="kanban-col">
+<div class="flex items-center justify-between px-xs py-sm border-b border-outline-variant/30 mb-sm shrink-0">
+<h3 class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+                                In Progress
+                                <span class="bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-full font-label-sm ml-sm">1</span>
+</h3>
+<button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+<!-- Card 5 -->
+<div class="kanban-card border-l-4 border-l-secondary-container">
+<div class="flex justify-between items-start">
+<span class="font-code text-code text-on-surface-variant bg-surface-container-low px-1 rounded">AF-897</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Printer Jam (HQ Fl 2)</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Paper feed mechanism stuck. Parts ordered.</p>
+</div>
+<!-- Progress indicator -->
+<div class="mt-2 w-full bg-surface-variant rounded-full h-1.5">
+<div class="bg-secondary-container h-1.5 rounded-full" style="width: 65%"></div>
+</div>
+<div class="mt-auto pt-sm flex justify-between items-center border-t border-outline-variant/30">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Awaiting parts</span>
+</div>
+</div>
+</div>
+<!-- Column: Resolved -->
+<div class="kanban-col opacity-80">
+<div class="flex items-center justify-between px-xs py-sm border-b border-outline-variant/30 mb-sm shrink-0">
+<h3 class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-surface-tint" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                Resolved
+                                <span class="bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-full font-label-sm ml-sm">1</span>
+</h3>
+<button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+<!-- Card 6 -->
+<div class="kanban-card border-l-4 border-l-surface-tint bg-surface-bright">
+<div class="flex justify-between items-start">
+<span class="font-code text-code text-outline bg-surface-container-low px-1 rounded line-through">AF-873</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface-variant">Office Chair Repair</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Broken caster wheel.</p>
+</div>
+<div class="mt-auto pt-sm flex justify-between items-center border-t border-outline-variant/30">
+<span class="font-label-sm text-label-sm text-surface-tint font-medium">Resolved 7 Jul</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border-t border-outline-variant p-sm px-margin-page text-center">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Approving a card moves the asset to 'under maintenance', resolving returns it to 'available'. Drag and drop to update status.</p>
+</div>
+</main>
+</div>
+</body></html>

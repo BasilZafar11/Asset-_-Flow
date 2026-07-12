@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AssetFlow ERP - Supply Chain OneView</title>
+<!-- Google Fonts: Inter for the UI Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#005eb2",
+                        "on-surface": "#1b1c1c",
+                        "on-tertiary-container": "#fff3ee",
+                        "primary": "#0058a7",
+                        "surface-variant": "#e3e2e2",
+                        "on-primary-fixed": "#001b3b",
+                        "inverse-on-surface": "#f2f0f0",
+                        "surface-container": "#efeded",
+                        "tertiary": "#923f00",
+                        "secondary-fixed-dim": "#a4c9ff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#b85203",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#a7c8ff",
+                        "on-secondary-fixed": "#001c39",
+                        "inverse-surface": "#303031",
+                        "surface": "#fbf9f9",
+                        "tertiary-fixed": "#ffdbca",
+                        "outline-variant": "#c1c6d5",
+                        "secondary": "#005fac",
+                        "on-secondary-container": "#003665",
+                        "primary-container": "#0070d2",
+                        "outline": "#717784",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#d5e3ff",
+                        "on-tertiary-fixed": "#331100",
+                        "surface-bright": "#fbf9f9",
+                        "on-tertiary-fixed-variant": "#773200",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#f3f5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d4e3ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e9e8e7",
+                        "on-primary-fixed-variant": "#004788",
+                        "surface-container-highest": "#e3e2e2",
+                        "surface-container-low": "#f5f3f3",
+                        "surface-dim": "#dbdad9",
+                        "tertiary-fixed-dim": "#ffb68f",
+                        "secondary-container": "#4fa0ff",
+                        "primary-fixed-dim": "#a7c8ff",
+                        "on-secondary-fixed-variant": "#004884",
+                        "background": "#fbf9f9",
+                        "on-surface-variant": "#414753",
+                        "on-background": "#1b1c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "header-height": "56px",
+                        "md": "16px",
+                        "margin-page": "24px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "unit": "4px",
+                        "tab-bar-height": "40px",
+                        "gutter": "16px",
+                        "sm": "8px",
+                        "sidebar-width": "240px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "code": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D8DDE6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #717784;
+        }
+
+        .chart-bar-transition {
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .drop-zone {
+            border: 2px dashed transparent;
+            transition: all 0.2s ease;
+        }
+        .drop-zone:hover {
+            border-color: #0058a7;
+            background-color: #f0f7fd;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-secondary-container selection:text-on-secondary-container">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar (Predicted Component) -->
+<aside class="flex flex-col h-full border-r border-outline-variant overflow-y-auto bg-surface-container-lowest dark:bg-surface-container-high w-sidebar-width h-screen sticky left-0 z-50">
+<!-- Header Section -->
+<div class="p-md flex items-center gap-sm">
+<div class="w-10 h-10 bg-primary rounded flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-headline-md">hub</span>
+</div>
+<div class="overflow-hidden">
+<div class="font-label-md text-label-md font-bold text-on-surface truncate">Supply Chain OneView</div>
+<div class="text-[10px] text-on-surface-variant uppercase tracking-widest">Admin Console</div>
+</div>
+</div>
+<div class="px-md py-sm">
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md py-sm rounded shadow-sm transition-all flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    New Record
+                </button>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 mt-sm space-y-xs">
+<!-- Dashboard (Active) -->
+<a class="flex items-center gap-md px-md py-sm bg-secondary-container dark:bg-secondary text-on-secondary-container border-l-4 border-primary font-bold transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">corporate_fare</span>
+<span class="font-label-md text-label-md">Organization</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md text-label-md">Assets</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">swap_horiz</span>
+<span class="font-label-md text-label-md">Allocation</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">event_available</span>
+<span class="font-label-md text-label-md">Resource Booking</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">build</span>
+<span class="font-label-md text-label-md">Maintenance</span>
+</a>
+</nav>
+<!-- Footer Tabs -->
+<div class="mt-auto border-t border-outline-variant p-sm space-y-xs">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Reports</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-md text-label-md">Notifications</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+<!-- TopNavBar (Predicted Component) -->
+<header class="flex justify-between items-center h-header-height px-lg w-full sticky top-0 z-50 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-xl">
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">AssetFlow ERP</h1>
+<div class="flex items-center bg-surface-container rounded-full px-md py-xs border border-outline-variant w-96">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline" placeholder="Search visualizations, assets, or records..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-xs rounded cursor-pointer active:opacity-80">help</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-xs rounded cursor-pointer active:opacity-80 relative">
+                        notifications
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full border border-surface"></span>
+</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-xs rounded cursor-pointer active:opacity-80">settings</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-xs"></div>
+<div class="flex items-center gap-sm">
+<div class="text-right hidden lg:block">
+<p class="font-label-md text-label-md text-on-surface">Alex Rivera</p>
+<p class="text-[10px] text-on-surface-variant font-medium">SCM ARCHITECT</p>
+</div>
+<img class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="A professional headshot of a middle-aged tech professional with a warm smile, wearing a modern charcoal grey blazer. The background is a soft-focus high-end corporate office with cool blue and white ambient lighting, perfectly matching the AssetFlow ERP brand identity. The lighting is crisp and clear, highlighting a high-resolution, authoritative aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMB31B6jpNnmNaXREeBNnV73XtQtGwtlb8pnHwFsp59oe671sFK3BiN-RP4H7KRO8RuO2uARnYYvVhrBudU8NlaLoTZ5aoxycMxbhg7sNbQncpTYSXMyiNSCHrMjsUl0X_7CIkG74XISXAgAjvFp4N6_IeCJw0QcdsNrOXnOZnoN7dcF0x0UnKI_1y2cdJuCdNQu7MyMDBGIfsxGOYNa0Roy7ckR68xmzAOgOLt3lG60g5MxbdSwZjkSFbPDKUrCk3mQ6RoUoScQA"/>
+</div>
+</div>
+</header>
+<!-- Multi-Tab Workspace Header -->
+<div class="bg-surface border-b border-outline-variant flex items-end px-lg overflow-x-auto h-tab-bar-height scrollbar-hide">
+<div class="flex">
+<button class="px-md py-sm border-b-2 border-transparent text-on-surface-variant font-label-md text-label-md flex items-center gap-xs whitespace-nowrap hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-[16px]">home</span>
+                        Home
+                    </button>
+<button class="px-md py-sm border-b-2 border-transparent text-on-surface-variant font-label-md text-label-md flex items-center gap-xs whitespace-nowrap hover:bg-surface-container-low">
+                        Inventory Resilience Command
+                    </button>
+<div class="relative bg-surface-container-lowest border-x border-outline-variant rounded-t-lg px-md py-sm border-b-2 border-primary font-bold text-primary flex items-center gap-xs whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">bar_chart</span>
+                        * New Visualization
+                        <span class="material-symbols-outlined text-[14px] ml-sm cursor-pointer hover:text-error">close</span>
+</div>
+</div>
+<div class="ml-auto flex items-center gap-sm pb-xs">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+<!-- Workspace Top Actions -->
+<div class="bg-white border-b border-outline-variant px-lg py-sm flex justify-between items-center">
+<div class="flex flex-col">
+<h2 class="text-headline-md font-headline-md text-on-surface flex items-center gap-sm">
+                        New Visualization
+                        <span class="material-symbols-outlined text-outline-variant text-[16px]">edit</span>
+</h2>
+<p class="text-body-sm text-on-surface-variant">Editing: Inventory Resilience Command • Last saved: Never</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-md py-sm border border-outline text-primary font-label-md text-label-md rounded hover:bg-surface-container-high transition-colors">Preview</button>
+<button class="px-md py-sm bg-primary text-on-primary font-label-md text-label-md rounded shadow-sm hover:opacity-90 transition-all">Save</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline rounded hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+</button>
+</div>
+</div>
+<!-- Toolbar -->
+<div class="bg-surface border-b border-outline-variant px-lg py-xs flex items-center gap-lg">
+<div class="flex items-center gap-sm border-r border-outline-variant pr-md">
+<button class="p-xs hover:bg-surface-variant rounded material-symbols-outlined text-on-surface-variant" title="Undo">undo</button>
+<button class="p-xs hover:bg-surface-variant rounded material-symbols-outlined text-on-surface-variant" title="Redo">redo</button>
+</div>
+<div class="flex items-center gap-sm border-r border-outline-variant pr-md">
+<div class="flex items-center gap-xs px-sm py-xs bg-surface-container-high rounded cursor-pointer border border-primary/20">
+<span class="material-symbols-outlined text-primary text-[18px]">query_stats</span>
+<span class="font-label-md text-label-md text-primary">Data Viz</span>
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">filter_alt</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">swap_vert</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">visibility</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">fullscreen</button>
+</div>
+<div class="ml-auto">
+<button class="bg-secondary text-on-secondary px-md py-1.5 rounded-full font-label-md text-label-md shadow-lg flex items-center gap-xs animate-pulse">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                        Suggest
+                    </button>
+</div>
+</div>
+<!-- Main Split Layout -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Sidebar: Fields & Analytics -->
+<div class="w-72 border-r border-outline-variant flex flex-col bg-surface-container-lowest">
+<!-- Tabs for Data/Style -->
+<div class="flex border-b border-outline-variant">
+<button class="flex-1 py-sm border-b-2 border-primary text-primary font-label-md text-label-md">Data</button>
+<button class="flex-1 py-sm border-b-2 border-transparent text-on-surface-variant font-label-md text-label-md hover:bg-surface-container">Style</button>
+</div>
+<!-- Search Fields -->
+<div class="p-sm flex-1 flex flex-col gap-sm overflow-hidden">
+<div class="flex items-center gap-sm">
+<div class="flex items-center bg-surface-container-high rounded px-sm py-1 border border-outline-variant flex-1">
+<span class="material-symbols-outlined text-outline text-[16px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-[12px] w-full p-1" placeholder="Search fields..." type="text"/>
+</div>
+<button class="p-1 hover:bg-surface-variant rounded"><span class="material-symbols-outlined text-[18px]">filter_list</span></button>
+<button class="p-1 hover:bg-surface-variant rounded text-primary"><span class="material-symbols-outlined text-[18px]">add</span></button>
+</div>
+<!-- Fields List -->
+<div class="flex-1 overflow-y-auto space-y-md pr-1">
+<!-- Dimensions -->
+<div>
+<div class="flex items-center justify-between group cursor-pointer mb-sm">
+<span class="font-label-md text-label-md uppercase tracking-wide text-outline">Dimensions</span>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-primary">expand_more</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-sm px-sm py-1.5 hover:bg-secondary-container/20 rounded cursor-move group">
+<span class="material-symbols-outlined text-[16px] text-primary">abc</span>
+<span class="text-body-sm text-on-surface truncate">Product On-Hand</span>
+</div>
+<div class="flex items-center gap-sm px-sm py-1.5 hover:bg-secondary-container/20 rounded cursor-move">
+<span class="material-symbols-outlined text-[16px] text-primary">location_on</span>
+<span class="text-body-sm text-on-surface">Internal Organization</span>
+</div>
+<div class="flex items-center gap-sm px-sm py-1.5 hover:bg-secondary-container/20 rounded cursor-move">
+<span class="material-symbols-outlined text-[16px] text-primary">qr_code</span>
+<span class="text-body-sm text-on-surface">Inventory Product Code</span>
+</div>
+<div class="flex items-center gap-sm px-sm py-1.5 hover:bg-secondary-container/20 rounded cursor-move bg-secondary-container/30 border border-secondary-container">
+<span class="material-symbols-outlined text-[16px] text-primary">category</span>
+<span class="text-body-sm text-on-surface font-semibold">Product Stock Status</span>
+</div>
+</div>
+</div>
+<!-- Measures -->
+<div>
+<div class="flex items-center justify-between group cursor-pointer mb-sm">
+<span class="font-label-md text-label-md uppercase tracking-wide text-outline">Measures</span>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-primary">expand_more</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-sm px-sm py-1.5 hover:bg-tertiary-container/20 rounded cursor-move">
+<span class="material-symbols-outlined text-[16px] text-tertiary">tag</span>
+<span class="text-body-sm text-on-surface">Product On-Hand Qty</span>
+</div>
+<div class="flex items-center gap-sm px-sm py-1.5 hover:bg-tertiary-container/20 rounded cursor-move">
+<span class="material-symbols-outlined text-[16px] text-tertiary">tag</span>
+<span class="text-body-sm text-on-surface">Product Safety Stock Qty</span>
+</div>
+<div class="flex items-center gap-sm px-sm py-1.5 hover:bg-tertiary-container/20 rounded cursor-move">
+<span class="material-symbols-outlined text-[16px] text-tertiary">payments</span>
+<span class="text-body-sm text-on-surface">Product Unit Inventory Price</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle Config Panel (Shelves) -->
+<div class="w-64 border-r border-outline-variant flex flex-col bg-surface-container-low overflow-y-auto">
+<!-- Column/Row Shelves -->
+<div class="p-md space-y-md border-b border-outline-variant">
+<div>
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-[18px] text-outline">view_column</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Columns</span>
+</div>
+<div class="drop-zone min-h-[40px] bg-white border border-outline-variant rounded p-1 flex flex-wrap gap-1">
+<div class="flex items-center gap-1 bg-tertiary/10 text-tertiary border border-tertiary/30 px-2 py-0.5 rounded-full text-[11px] font-bold">
+                                    SUM(Product On-Han...
+                                    <span class="material-symbols-outlined text-[14px] cursor-pointer">close</span>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-[18px] text-outline">view_headline</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Rows</span>
+</div>
+<div class="drop-zone min-h-[40px] bg-white border border-outline-variant rounded p-1 flex flex-wrap gap-1">
+<div class="flex items-center gap-1 bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 rounded-full text-[11px] font-bold">
+                                    Product
+                                    <span class="material-symbols-outlined text-[14px] cursor-pointer">close</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Marks Card -->
+<div class="p-md space-y-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[18px] text-outline">brush</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Marks</span>
+</div>
+<button class="material-symbols-outlined text-[16px] text-outline">expand_less</button>
+</div>
+<div class="grid grid-cols-2 gap-sm">
+<button class="bg-white border border-outline-variant rounded p-md flex flex-col items-center justify-center gap-xs hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] text-outline-variant group-hover:text-primary">palette</span>
+<span class="text-[10px] uppercase font-bold text-outline-variant group-hover:text-primary">Color</span>
+<div class="w-full h-1 bg-secondary-container mt-xs rounded"></div>
+</button>
+<button class="bg-white border border-outline-variant rounded p-md flex flex-col items-center justify-center gap-xs hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] text-outline-variant group-hover:text-primary">open_in_full</span>
+<span class="text-[10px] uppercase font-bold text-outline-variant group-hover:text-primary">Size</span>
+</button>
+<button class="bg-white border border-outline-variant rounded p-md flex flex-col items-center justify-center gap-xs hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] text-outline-variant group-hover:text-primary">label</span>
+<span class="text-[10px] uppercase font-bold text-outline-variant group-hover:text-primary">Label</span>
+</button>
+<button class="bg-white border border-outline-variant rounded p-md flex flex-col items-center justify-center gap-xs hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] text-outline-variant group-hover:text-primary">info</span>
+<span class="text-[10px] uppercase font-bold text-outline-variant group-hover:text-primary">Tooltip</span>
+</button>
+</div>
+<div class="bg-primary/5 border border-primary/20 rounded p-sm">
+<div class="flex items-center gap-xs text-primary font-bold text-[11px] mb-xs">
+<span class="material-symbols-outlined text-[16px]">palette</span>
+                                Color Mapped to:
+                            </div>
+<div class="text-[12px] text-on-surface font-medium truncate">Product Stock Status</div>
+</div>
+</div>
+<!-- Analytics Section -->
+<div class="mt-auto p-md border-t border-outline-variant bg-surface-container">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Analytics</span>
+<span class="material-symbols-outlined text-[16px] text-outline">analytics</span>
+</div>
+<div class="space-y-sm">
+<div class="flex items-center gap-sm p-sm bg-white border border-outline-variant rounded hover:shadow-sm cursor-pointer transition-all">
+<span class="material-symbols-outlined text-outline text-[18px]">show_chart</span>
+<span class="text-body-sm">Trend Lines</span>
+</div>
+<div class="flex items-center gap-sm p-sm bg-white border border-outline-variant rounded hover:shadow-sm cursor-pointer transition-all">
+<span class="material-symbols-outlined text-outline text-[18px]">batch_prediction</span>
+<span class="text-body-sm">Forecast</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Canvas Area -->
+<div class="flex-1 flex flex-col bg-white overflow-hidden p-lg">
+<!-- Chart Header -->
+<div class="flex justify-between items-center mb-xl">
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm">
+<div class="w-3 h-3 rounded-full bg-[#9333ea]"></div>
+<span class="text-body-sm text-on-surface-variant">Healthy</span>
+</div>
+<div class="flex items-center gap-sm">
+<div class="w-3 h-3 rounded-full bg-[#3b82f6]"></div>
+<span class="text-body-sm text-on-surface-variant">Critical Shortage</span>
+</div>
+<div class="flex items-center gap-sm">
+<div class="w-3 h-3 rounded-full bg-[#10b981]"></div>
+<span class="text-body-sm text-on-surface-variant">Overstock</span>
+</div>
+</div>
+<div class="text-body-sm text-on-surface-variant font-medium">
+                            X-Axis: <span class="text-on-surface font-bold">Sum of Product On-Hand Qty</span>
+</div>
+</div>
+<!-- Chart Body (Bento Style Layout for data bars) -->
+<div class="flex-1 overflow-y-auto pr-md">
+<div class="space-y-md">
+<!-- Chart Rows (Simulated Bar Chart) -->
+<div class="flex items-center gap-md group">
+<div class="w-48 text-right text-body-sm font-medium text-on-surface-variant group-hover:text-on-surface truncate">Armanda ALW 400</div>
+<div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden relative">
+<div class="h-full bg-[#9333ea] rounded-full chart-bar-transition" style="width: 55%"></div>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">312</span>
+</div>
+</div>
+<div class="flex items-center gap-md group">
+<div class="w-48 text-right text-body-sm font-medium text-on-surface-variant group-hover:text-on-surface truncate">Armanda BMV 560E</div>
+<div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden relative">
+<div class="h-full bg-[#9333ea] rounded-full chart-bar-transition" style="width: 38%"></div>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">208</span>
+</div>
+</div>
+<div class="flex items-center gap-md group">
+<div class="w-48 text-right text-body-sm font-medium text-on-surface-variant group-hover:text-on-surface truncate">Armanda RCW.X</div>
+<div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden relative">
+<div class="h-full bg-[#3b82f6] rounded-full chart-bar-transition" style="width: 22%"></div>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">89 (CRITICAL)</span>
+</div>
+</div>
+<div class="flex items-center gap-md group">
+<div class="w-48 text-right text-body-sm font-medium text-on-surface-variant group-hover:text-on-surface truncate">Bintmin 500</div>
+<div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden relative">
+<div class="h-full bg-[#10b981] rounded-full chart-bar-transition" style="width: 82%"></div>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">612 (OVERSTOCK)</span>
+</div>
+</div>
+<div class="flex items-center gap-md group">
+<div class="w-48 text-right text-body-sm font-medium text-on-surface-variant group-hover:text-on-surface truncate">Bintmin Original 500</div>
+<div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden relative">
+<div class="h-full bg-[#10b981] rounded-full chart-bar-transition" style="width: 91%"></div>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">745</span>
+</div>
+</div>
+<div class="flex items-center gap-md group">
+<div class="w-48 text-right text-body-sm font-medium text-on-surface-variant group-hover:text-on-surface truncate">Hirakl AM 40B</div>
+<div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden relative">
+<div class="h-full bg-[#9333ea] rounded-full chart-bar-transition" style="width: 65%"></div>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">423</span>
+</div>
+</div>
+<div class="flex items-center gap-md group">
+<div class="w-48 text-right text-body-sm font-medium text-on-surface-variant group-hover:text-on-surface truncate">Hirakl CTK00</div>
+<div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden relative">
+<div class="h-full bg-[#9333ea] rounded-full chart-bar-transition" style="width: 62%"></div>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">401</span>
+</div>
+</div>
+</div>
+<!-- Empty state / Instructional if no data (Inspired by reference) -->
+<div class="hidden flex-col items-center justify-center py-24 gap-md opacity-50">
+<img class="w-64 h-48 object-contain" data-alt="A clean, minimalist vector illustration of a stylized supply chain map with faint nodes and connecting lines, designed in a soft blue and grey professional corporate style. The image represents 'ready to visualize' state and has an airy, modern, high-tech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEkEYTQ1KUxwV9xQLHAFzZnjG_D166IYJ8LKGBTmw5Dk9_ZaGn8yo3eGNskQRYWoc663hk8Sfbn-PskSzMB8Giff0LCfca3JCfWsyOMh3DBNxwBvTo1JkXd5xp7ZNkPvsuBPWPsmQjma06Qh3b89gyjUkHZR6qsFYHwDDYGAvQfKPlaCfjgZdUnriVC8IF3QsnGSKxTNnDTT9BaMNGaVQZRkwZDoYVPcMSRuB3mhP3DT_AhY049pN_7JLOMB_hJQaxyc_wPXe_Exc"/>
+<p class="font-headline-md text-headline-md text-on-surface-variant">Add fields to visualize</p>
+<p class="text-body-md text-outline">Drag and drop dimensions or measures from the sidebar to the shelves.</p>
+</div>
+</div>
+<!-- Chart Grid Labels -->
+<div class="mt-lg border-t border-outline-variant pt-sm flex justify-between px-48 text-[10px] text-outline font-bold">
+<span>0</span>
+<span>100</span>
+<span>200</span>
+<span>300</span>
+<span>400</span>
+<span>500</span>
+<span>600+</span>
+</div>
+</div>
+<!-- Right Sidebar: Chart Types -->
+<div class="w-56 border-l border-outline-variant bg-surface-container-lowest flex flex-col p-md gap-md overflow-y-auto">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Chart Type</span>
+<button class="material-symbols-outlined text-[18px] text-outline hover:text-primary">info</button>
+</div>
+<div class="grid grid-cols-2 gap-sm">
+<!-- Chart Selection Buttons (Inspired by Reference) -->
+<button class="aspect-square bg-white border border-primary border-2 rounded p-1 shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-primary">bar_chart</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">stacked_bar_chart</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">bubble_chart</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">pie_chart</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">show_chart</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">scatter_plot</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">heat_pump</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">map</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">table_view</span>
+</button>
+<button class="aspect-square bg-white border border-outline-variant rounded p-1 hover:border-primary/50 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px] text-outline">waterfall_chart</span>
+</button>
+</div>
+<div class="mt-4 p-sm bg-surface-container rounded-lg border border-outline-variant">
+<p class="text-[11px] text-on-surface-variant italic">Select a chart type to instantly transform your data view.</p>
+</div>
+</div>
+</div>
+<!-- Footer Status Bar -->
+<footer class="h-6 bg-surface-container-high border-t border-outline-variant px-lg flex items-center justify-between text-[10px] text-on-surface-variant font-medium uppercase tracking-tighter">
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs">
+<span class="w-1.5 h-1.5 bg-success rounded-full"></span>
+                        Connected: SCM Live Feed
+                    </div>
+<span>Row Count: 2,450</span>
+</div>
+<div class="flex items-center gap-md">
+<span>Page 1 of 1</span>
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[12px]">zoom_in</span> 100%</span>
+</div>
+</footer>
+</main>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+        // Simple logic for drag-and-drop visual feedback
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('bg-primary/5', 'border-primary');
+            });
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('bg-primary/5', 'border-primary');
+            });
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('bg-primary/5', 'border-primary');
+                // Mock adding a field
+            });
+        });
+
+        // Initialize bar chart animation delay
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.chart-bar-transition').forEach((bar, index) => {
+                    // Logic would go here to set width if it wasn't already hardcoded for the demo
+                });
+            }, 300);
+        });
+    </script>
+</body></html>
