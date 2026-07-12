@@ -121,10 +121,14 @@ export function Bookings() {
     try {
       const { data: assetData } = await api.get(`/assets/${assetTag}`)
       setActiveAsset(assetData)
-      const startBound = new Date(selectedDate)
+      let startBound = new Date(selectedDate)
+      let endBound = new Date(selectedDate)
+      if (calendarMode === 'week') {
+        const weekDays = getWeekDays()
+        startBound = new Date(weekDays[0])
+        endBound = new Date(weekDays[6])
+      }
       startBound.setHours(0, 0, 0, 0)
-      const endBound = new Date(selectedDate)
-      if (calendarMode === 'week') endBound.setDate(endBound.getDate() + 6)
       endBound.setHours(23, 59, 59, 999)
       const { data } = await api.get(`/bookings`, { params: { asset_tag: assetTag, date_from: startBound.toISOString(), date_to: endBound.toISOString() } })
       setBookings(data)
@@ -212,13 +216,30 @@ export function Bookings() {
   // ── Calendar helpers ────────────────────────────────────────────────────────
   const calendarHours = Array.from({ length: 17 }, (_, i) => 6 + i)
 
-  const getBookingLayoutStyles = (booking) => {
-    const start = new Date(booking.start_time), end = new Date(booking.end_time)
-    const dayStart = 6 * 60, dayEnd = 22 * 60, total = dayEnd - dayStart
-    const startMin = (start.getHours() * 60 + start.getMinutes()) - dayStart
-    const dur = (end.getTime() - start.getTime()) / 60000
+  const getBookingLayoutStyles = (booking, targetDate) => {
+    const start = new Date(booking.start_time)
+    const end = new Date(booking.end_time)
+    const viewDate = targetDate || selectedDate
+
+    const dayStart = new Date(viewDate)
+    dayStart.setHours(6, 0, 0, 0)
+    const dayEnd = new Date(viewDate)
+    dayEnd.setHours(22, 0, 0, 0)
+
+    const clampStart = new Date(Math.max(start.getTime(), dayStart.getTime()))
+    const clampEnd = new Date(Math.min(end.getTime(), dayEnd.getTime()))
+
+    if (clampStart >= clampEnd) {
+      return { display: 'none' }
+    }
+
+    const total = 16 * 60 // 960 minutes
+    const startMin = (clampStart.getHours() * 60 + clampStart.getMinutes()) - (6 * 60)
+    const dur = (clampEnd.getTime() - clampStart.getTime()) / 60000
+
     const top = Math.max(0, (startMin / total) * 100)
     const height = Math.min(100 - top, (dur / total) * 100)
+
     return { top: `${top}%`, height: `${height}%`, position: 'absolute', left: '4px', right: '4px', zIndex: 2 }
   }
 
@@ -402,7 +423,7 @@ export function Bookings() {
                   {bookings.map((booking) => (
                     <div key={booking.id} onClick={(e) => handleBookingClick(booking, e)}
                       className={cn('rounded-md p-2 overflow-hidden flex flex-col text-xs cursor-pointer select-none transition-all hover:brightness-95', getBookingBlockClasses(booking.status))}
-                      style={{ ...getBookingLayoutStyles(booking), marginLeft: '64px' }}
+                      style={{ ...getBookingLayoutStyles(booking, selectedDate), marginLeft: '64px' }}
                     >
                       <span className="font-semibold truncate">{booking.BookedBy?.name || 'Requester'}</span>
                       <span className="truncate mt-0.5 opacity-70">{booking.booked_for}</span>
@@ -432,14 +453,22 @@ export function Bookings() {
                       ))}
                     </div>
                     {getWeekDays().map((day) => {
-                      const dayBookings = bookings.filter(b => new Date(b.start_time).toDateString() === day.toDateString())
+                      const dayBookings = bookings.filter(b => {
+                        const bStart = new Date(b.start_time)
+                        const bEnd = new Date(b.end_time)
+                        const dStart = new Date(day)
+                        dStart.setHours(0, 0, 0, 0)
+                        const dEnd = new Date(day)
+                        dEnd.setHours(23, 59, 59, 999)
+                        return bStart < dEnd && bEnd > dStart
+                      })
                       return (
                         <div key={day.toISOString()} className="flex-1 border-r border-neutral-100 h-full relative cursor-pointer hover:bg-primary-50/20" onClick={() => handleSlotClick(day, 9)}>
                           {calendarHours.map((_, idx) => (
                             <div key={idx} style={{ position: 'absolute', top: `${(idx / calendarHours.length) * 100}%`, left: 0, right: 0, height: `${100 / calendarHours.length}%`, borderBottom: '1px solid #f9fafb' }} />
                           ))}
                           {dayBookings.map((booking) => (
-                            <div key={booking.id} style={getBookingLayoutStyles(booking)} onClick={(e) => handleBookingClick(booking, e)}
+                            <div key={booking.id} style={getBookingLayoutStyles(booking, day)} onClick={(e) => handleBookingClick(booking, e)}
                               className={cn('rounded-md p-1.5 overflow-hidden flex flex-col text-[10px] cursor-pointer select-none hover:brightness-95', getBookingBlockClasses(booking.status))}
                             >
                               <span className="font-semibold truncate">{booking.BookedBy?.name || 'Requester'}</span>

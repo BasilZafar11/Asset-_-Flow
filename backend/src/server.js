@@ -63,7 +63,7 @@ app.use('/api', reportsRouter);
 export const syncDatabase = async () => {
   try {
     console.log('Syncing Sequelize models with MySQL Database...');
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log('Sequelize database models synchronized successfully!');
     
     // Start the scheduled background booking scheduler

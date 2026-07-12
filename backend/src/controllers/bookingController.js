@@ -92,8 +92,8 @@ export const listBookings = async (req, res) => {
     };
 
     if (date_from && date_to) {
-      whereClause.start_time = { [Op.gte]: new Date(date_from) };
-      whereClause.end_time = { [Op.lte]: new Date(date_to) };
+      whereClause.start_time = { [Op.lt]: new Date(date_to) };
+      whereClause.end_time = { [Op.gt]: new Date(date_from) };
     }
 
     const bookings = await Booking.findAll({

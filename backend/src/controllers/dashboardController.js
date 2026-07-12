@@ -43,7 +43,7 @@ export const getDashboard = async (req, res) => {
         Asset.findAll({
           attributes: [
             'category_id',
-            [sequelize.fn('COUNT', sequelize.col('Asset.id')), 'count']
+            [sequelize.fn('COUNT', sequelize.col('Asset.tag')), 'count']
           ],
           where: { organization_id: orgId },
           group: ['category_id'],
