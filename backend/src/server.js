@@ -22,6 +22,14 @@ import reportsRouter from './routes/reportsRouter.js';
 
 const app = express();
 
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  res.on('finish', () => {
+    console.log(`[RESPONSE] ${req.method} ${req.url} -> ${res.statusCode}`);
+  });
+  next();
+});
+
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
