@@ -50,3 +50,204 @@ No user can self-elevate permissions during registration. Users onboard into exi
 ├── app.js             # Express core app config, global CORS handling, and routing mounts
 ├── package.json       # Node package configurations & project dependencies
 └── .env               # Isolated environment configurations & credentials
+
+# 🛡️ Critical Engineering Solutions & Edge Cases Covered
+
+## 1. The Double-Allocation Logic Trap (Assets)
+
+### Problem
+Race conditions could allow two managers to concurrently execute checkout actions on the same piece of hardware, causing data corruption.
+
+### Solution
+**State Locking at the controller tier.**
+
+Before writing an allocation record, the system validates the current state of the asset. If the asset status is anything other than **Available**, the allocation request is blocked and the user is redirected to the **Transfer Request** workflow instead.
+
+---
+
+## 2. Calendar Booking Overlap Detection (Shared Spaces)
+
+### Problem
+Simple equality checks cannot detect partially overlapping booking intervals for shared resources such as meeting rooms or vehicles.
+
+### Solution
+Before inserting a booking, the backend executes an overlap validation query:
+
+```sql
+SELECT *
+FROM Bookings
+WHERE asset_tag = :tag
+  AND status != 'Cancelled'
+  AND (
+        start_time < :new_end_time
+    AND end_time > :new_start_time
+      );
+```
+
+If any conflicting bookings are found, the backend immediately returns a **400 Bad Request**, allowing the frontend scheduler to notify the user without creating duplicate reservations.
+
+---
+
+## 3. High-Density Analytics Calculations
+
+### Division-by-Zero Protection
+
+New workspaces may initially contain no assets or bookings.
+
+Instead of allowing division-by-zero exceptions to crash analytics endpoints, all calculations safely default to **0.0%** until meaningful data exists.
+
+### Peak Booking Heatmaps
+
+Historical booking data (excluding cancelled bookings) is aggregated by:
+
+- Day of the week (1–7)
+- Hour of the day (0–23)
+
+This dataset directly powers the frontend heatmap visualization components.
+
+---
+
+## 4. Database Exception Mitigation Strategies
+
+### Foreign Key Deletion Protection
+
+Instead of permanently deleting records that participate in historical relationships, the system uses status enums:
+
+- **Active**
+- **Inactive**
+
+This preserves historical allocations and analytics while preventing foreign key constraint violations.
+
+### Connection Pool Leak Prevention
+
+Every route controller follows an explicit:
+
+- `try`
+- `catch`
+- `finally`
+
+pattern to guarantee that every database connection is released back to the pool:
+
+```javascript
+connection.release();
+```
+
+This prevents connection pool starvation during periods of heavy application traffic.
+
+---
+
+# 📋 Six-Phase Structured Audit Lifecycle
+
+The application implements a complete compliance workflow instead of relying on single-step audit submissions.
+
+## Phase 1 — Audit Creation
+
+Administrators or Asset Managers:
+
+- Create a new Audit Cycle
+- Select the target department
+- Configure audit dates
+- Assign auditors
+- Save the audit with **Draft** status
+
+---
+
+## Phase 2 — Asset Registration
+
+Assigned auditors populate the audit checklist by:
+
+- Adding individual asset tags
+- Importing comma-separated asset tag lists
+
+Every imported asset begins with a status of **Pending**.
+
+---
+
+## Phase 3 — Physical Audit Execution
+
+Auditors inspect each listed asset and assign one of the following statuses:
+
+- ✅ Verified
+- ❌ Missing
+- 🔧 Damaged
+
+---
+
+## Phase 4 — Discrepancy Resolution
+
+Asset Managers review every reported discrepancy.
+
+Each flagged item can be marked as:
+
+- **Confirmed**
+- **Dismissed**
+
+---
+
+## Phase 5 — Audit Closure
+
+Once **no Pending items remain**, managers may close the audit cycle.
+
+Closing the audit permanently locks the audit data and automatically performs transactional inventory updates.
+
+### Automatic Status Transitions
+
+| Audit Result | Inventory Status |
+|--------------|------------------|
+| Confirmed Missing | Lost |
+| Confirmed Damaged | Under Repair |
+
+---
+
+## Phase 6 — Historical Archiving
+
+Closed audit cycles become:
+
+- Read-only
+- Permanently archived
+- Hidden from standard employee views
+
+This preserves historical compliance records while protecting production workspace integrity.
+
+---
+
+# 🚀 Environment Setup & Installation
+
+## Clone the Repository
+
+```bash
+git clone <repository-url>
+cd Asset-flow
+```
+
+---
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## Configure Environment Variables
+
+Create a `.env` file in the project root.
+
+```env
+PORT=5000
+
+DATABASE_URL=mysql://avnadmin:AVNS_b24HLOzF8Vh-m8wt9b4@bms-devyashrasela-09d7.g.aivencloud.com:26759/defaultdb?ssl-mode=REQUIRED
+
+JWT_SECRET_KEY=your_cryptographic_secret_key_string
+
+JWT_EXPIRE_MINUTES=60
+```
+
+---
+
+## Start the Development Server
+
+```bash
+npm run dev
+```
