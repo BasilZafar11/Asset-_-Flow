@@ -24,6 +24,7 @@ import { Dashboard } from './pages/Dashboard'
 import { AssetDirectory } from './pages/AssetDirectory'
 import { AssetDetail } from './pages/AssetDetail'
 import { Allocations } from './pages/Allocations'
+import { Reports } from './pages/Reports'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,7 +82,7 @@ export default function App() {
             <Route path="/bookings" element={<PlaceholderPage title="Bookings" />} />
             <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" />} />
             <Route path="/audit" element={<PlaceholderPage title="Audit" />} />
-            <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="/activity-log" element={<PlaceholderPage title="Activity Log" />} />
             <Route path="/organization-setup" element={<OrganizationSetup />} />
             <Route path="/settings" element={<PlaceholderPage title="Settings" />} />

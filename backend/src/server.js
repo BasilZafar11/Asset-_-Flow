@@ -17,6 +17,7 @@ import auditRouter from './routes/auditRouter.js';
 import notificationRouter from './routes/notificationRouter.js';
 import logRouter from './routes/logRouter.js';
 import dashboardRouter from './routes/dashboardRouter.js';
+import reportsRouter from './routes/reportsRouter.js';
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use('/api', auditRouter);
 app.use('/api', notificationRouter);
 app.use('/api', logRouter);
 app.use('/api', dashboardRouter);
+app.use('/api', reportsRouter);
 
 // Sync database on startup
 export const syncDatabase = async () => {

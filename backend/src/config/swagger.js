@@ -840,6 +840,83 @@ const swaggerDocument = {
           200: { description: 'KPI data aggregated' }
         }
       }
+    },
+    '/reports/summary': {
+      get: {
+        summary: 'KPI summary strip — Total Assets, Utilization Rate, Active Maintenance, Overdue Allocations',
+        tags: ['Reports & Analytics'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        responses: { 200: { description: 'KPI summary object' } }
+      }
+    },
+    '/reports/utilization': {
+      get: {
+        summary: 'Asset utilization — most-used, idle assets, monthly trend',
+        tags: ['Reports & Analytics'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'start_date', in: 'query', schema: { type: 'string', format: 'date' }, description: 'Start date (default: 90 days ago)' },
+          { name: 'end_date', in: 'query', schema: { type: 'string', format: 'date' }, description: 'End date (default: today)' }
+        ],
+        responses: { 200: { description: 'Utilization report with most_used, idle_assets, utilization_trend' } }
+      }
+    },
+    '/reports/maintenance': {
+      get: {
+        summary: 'Maintenance analytics — by asset, category, priority, status',
+        tags: ['Reports & Analytics'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'start_date', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'end_date', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: { 200: { description: 'Maintenance report with by_asset, by_category, priority_distribution, status_breakdown' } }
+      }
+    },
+    '/reports/lifecycle': {
+      get: {
+        summary: 'Lifecycle — due for maintenance, nearing retirement, status distribution',
+        tags: ['Reports & Analytics'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        responses: { 200: { description: 'Lifecycle report with due_for_maintenance, nearing_retirement, status_distribution' } }
+      }
+    },
+    '/reports/departments': {
+      get: {
+        summary: 'Department allocation summary + headcount ratio',
+        tags: ['Reports & Analytics'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'start_date', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'end_date', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: { 200: { description: 'Department report with allocation_summary, headcount_ratio' } }
+      }
+    },
+    '/reports/bookings/heatmap': {
+      get: {
+        summary: 'Booking heatmap — peak usage windows, most-booked resources, cancellation rate',
+        tags: ['Reports & Analytics'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'start_date', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'end_date', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: { 200: { description: 'Heatmap, most_booked, cancellation_rate' } }
+      }
+    },
+    '/reports/export': {
+      get: {
+        summary: 'Export report as CSV',
+        tags: ['Reports & Analytics'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'type', in: 'query', schema: { type: 'string', enum: ['utilization', 'maintenance', 'combined'] }, description: 'Report type (default: combined)' },
+          { name: 'start_date', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'end_date', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: { 200: { description: 'CSV file download', content: { 'text/csv': {} } } }
+      }
     }
   }
 };
