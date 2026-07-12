@@ -23,6 +23,10 @@ import { OrganizationSetup } from './pages/OrganizationSetup'
 import { Dashboard } from './pages/Dashboard'
 import { AssetDirectory } from './pages/AssetDirectory'
 import { AssetDetail } from './pages/AssetDetail'
+import { ActivityLog } from './pages/ActivityLog'
+import { AuditCycles } from './pages/AuditCycles'
+import { AuditDetail } from './pages/AuditDetail'
+import { AuditReport } from './pages/AuditReport'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,9 +83,11 @@ export default function App() {
             <Route path="/allocations" element={<PlaceholderPage title="Allocations" />} />
             <Route path="/bookings" element={<PlaceholderPage title="Bookings" />} />
             <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" />} />
-            <Route path="/audit" element={<PlaceholderPage title="Audit" />} />
+            <Route path="/audit" element={<AuditCycles />} />
+            <Route path="/audit/:cycleId" element={<AuditDetail />} />
+            <Route path="/audit/:cycleId/report" element={<AuditReport />} />
             <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
-            <Route path="/activity-log" element={<PlaceholderPage title="Activity Log" />} />
+            <Route path="/activity-log" element={<ActivityLog />} />
             <Route path="/organization-setup" element={<OrganizationSetup />} />
             <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
           </Route>
