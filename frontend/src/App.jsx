@@ -23,6 +23,7 @@ import { OrganizationSetup } from './pages/OrganizationSetup'
 import { Dashboard } from './pages/Dashboard'
 import { AssetDirectory } from './pages/AssetDirectory'
 import { AssetDetail } from './pages/AssetDetail'
+import { Allocations } from './pages/Allocations'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,7 +77,7 @@ export default function App() {
             {/* Placeholder routes for sidebar nav */}
             <Route path="/assets" element={<AssetDirectory />} />
             <Route path="/assets/:tag" element={<AssetDetail />} />
-            <Route path="/allocations" element={<PlaceholderPage title="Allocations" />} />
+            <Route path="/allocations" element={<Allocations />} />
             <Route path="/bookings" element={<PlaceholderPage title="Bookings" />} />
             <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" />} />
             <Route path="/audit" element={<PlaceholderPage title="Audit" />} />

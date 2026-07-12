@@ -7,6 +7,14 @@ const TransferRequest = sequelize.define('TransferRequest', {
     autoIncrement: true,
     primaryKey: true
   },
+  reason: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  urgency: {
+    type: DataTypes.ENUM('Normal', 'Urgent'),
+    defaultValue: 'Normal'
+  },
   status: {
     type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'),
     defaultValue: 'Pending'
@@ -15,7 +23,7 @@ const TransferRequest = sequelize.define('TransferRequest', {
   tableName: 'Transfer_Requests',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: false
+  updatedAt: 'updated_at'
 });
 
 export default TransferRequest;

@@ -390,16 +390,134 @@ const swaggerDocument = {
     },
     '/allocations': {
       get: {
-        summary: 'List active allocations',
-        tags: ['Allocations'],
+        summary: 'List allocations (role-scoped)',
+        tags: ['Allocations & Transfers'],
         security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['Active', 'Returned'] } },
+          { name: 'from_date', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'to_date', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
         responses: {
-          200: { description: 'Allocations retrieved' }
+          200: { description: 'Allocations retrieved with is_overdue and is_due_soon flags' }
         }
       },
       post: {
-        summary: 'Issue asset allocation',
-        tags: ['Allocations'],
+        summary: 'Allocate assets (supports multiple) with FOR UPDATE locking',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  asset_tags: { type: 'array', items: { type: 'string' }, description: 'Array of asset tags to allocate' },
+                  asset_tag: { type: 'string', description: 'Single asset tag (legacy compat)' },
+                  assigned_to_user_id: { type: 'integer' },
+                  expected_return_date: { type: 'string', format: 'date' },
+                  notes: { type: 'string' }
+                },
+                required: ['assigned_to_user_id']
+              }
+            }
+          }
+        },
+        responses: {
+          201: { description: 'Asset(s) allocated' },
+          409: { description: 'Conflict — assets not available (includes conflict details + transfer_request_eligible flag)' }
+        }
+      }
+    },
+    '/allocations/my': {
+      get: {
+        summary: 'List current user\'s own allocations',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        responses: {
+          200: { description: 'User allocations retrieved' }
+        }
+      }
+    },
+    '/allocations/overdue': {
+      get: {
+        summary: 'List all overdue allocations',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        responses: {
+          200: { description: 'Overdue allocations retrieved' }
+        }
+      }
+    },
+    '/allocations/asset/{tag}/history': {
+      get: {
+        summary: 'Allocation history for a specific asset',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'tag', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          200: { description: 'Asset allocation history retrieved' }
+        }
+      }
+    },
+    '/allocations/{id}': {
+      get: {
+        summary: 'Get allocation detail with timeline',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
+        ],
+        responses: {
+          200: { description: 'Allocation detail with activity timeline' }
+        }
+      }
+    },
+    '/allocations/{id}/return': {
+      patch: {
+        summary: 'Process return with condition check-in',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  return_date: { type: 'string', format: 'date' },
+                  condition: { type: 'string', enum: ['Good', 'Minor Wear', 'Damaged'] },
+                  checkin_notes: { type: 'string' },
+                  trigger_maintenance: { type: 'boolean', description: 'If true + Damaged, auto-creates maintenance request' }
+                },
+                required: ['condition']
+              }
+            }
+          }
+        },
+        responses: {
+          200: { description: 'Asset returned successfully' }
+        }
+      }
+    },
+    '/allocations/transfers': {
+      get: {
+        summary: 'List transfer requests (role-scoped)',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        responses: {
+          200: { description: 'Transfers listed' }
+        }
+      },
+      post: {
+        summary: 'Request an asset transfer',
+        tags: ['Allocations & Transfers'],
         security: [{ bearerAuth: [], orgIdHeader: [] }],
         requestBody: {
           required: true,
@@ -409,25 +527,37 @@ const swaggerDocument = {
                 type: 'object',
                 properties: {
                   asset_tag: { type: 'string' },
-                  assigned_to_user_id: { type: 'integer' },
-                  expected_return_date: { type: 'string', format: 'date' },
-                  notes: { type: 'string' }
+                  requested_new_holder_id: { type: 'integer' },
+                  reason: { type: 'string' },
+                  urgency: { type: 'string', enum: ['Normal', 'Urgent'] }
                 },
-                required: ['asset_tag', 'assigned_to_user_id']
+                required: ['asset_tag', 'requested_new_holder_id', 'reason']
               }
             }
           }
         },
         responses: {
-          201: { description: 'Asset allocated' },
-          409: { description: 'Conflict: asset is already checked out' }
+          201: { description: 'Transfer request submitted' }
         }
       }
     },
-    '/allocations/{id}/return': {
-      post: {
-        summary: 'Process return of allocated asset',
-        tags: ['Allocations'],
+    '/allocations/transfers/{id}/approve': {
+      patch: {
+        summary: 'Approve transfer request (re-allocates asset)',
+        tags: ['Allocations & Transfers'],
+        security: [{ bearerAuth: [], orgIdHeader: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
+        ],
+        responses: {
+          200: { description: 'Transfer approved and asset re-allocated' }
+        }
+      }
+    },
+    '/allocations/transfers/{id}/reject': {
+      patch: {
+        summary: 'Reject transfer request',
+        tags: ['Allocations & Transfers'],
         security: [{ bearerAuth: [], orgIdHeader: [] }],
         parameters: [
           { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
@@ -439,73 +569,12 @@ const swaggerDocument = {
               schema: {
                 type: 'object',
                 properties: {
-                  condition_notes: { type: 'string' }
+                  reason: { type: 'string', description: 'Optional rejection reason' }
                 }
               }
             }
           }
         },
-        responses: {
-          200: { description: 'Asset returned successfully' }
-        }
-      }
-    },
-    '/allocations/transfer': {
-      post: {
-        summary: 'Request peer-to-peer asset transfer',
-        tags: ['Allocations'],
-        security: [{ bearerAuth: [], orgIdHeader: [] }],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  asset_tag: { type: 'string' },
-                  target_user_id: { type: 'integer' }
-                },
-                required: ['asset_tag', 'target_user_id']
-              }
-            }
-          }
-        },
-        responses: {
-          201: { description: 'Transfer request submitted' }
-        }
-      }
-    },
-    '/allocations/transfers': {
-      get: {
-        summary: 'List transfer requests',
-        tags: ['Allocations'],
-        security: [{ bearerAuth: [], orgIdHeader: [] }],
-        responses: {
-          200: { description: 'Transfers listed' }
-        }
-      }
-    },
-    '/allocations/transfers/{id}/approve': {
-      post: {
-        summary: 'Approve transfer request',
-        tags: ['Allocations'],
-        security: [{ bearerAuth: [], orgIdHeader: [] }],
-        parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
-        ],
-        responses: {
-          200: { description: 'Transfer approved and asset re-allocated' }
-        }
-      }
-    },
-    '/allocations/transfers/{id}/reject': {
-      post: {
-        summary: 'Reject transfer request',
-        tags: ['Allocations'],
-        security: [{ bearerAuth: [], orgIdHeader: [] }],
-        parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
-        ],
         responses: {
           200: { description: 'Transfer request rejected' }
         }
