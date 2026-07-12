@@ -75,6 +75,8 @@ Booking.belongsTo(Asset, { foreignKey: 'asset_tag', targetKey: 'tag', as: 'Asset
 
 User.hasMany(Booking, { foreignKey: 'booked_by_user_id', onDelete: 'CASCADE' });
 Booking.belongsTo(User, { foreignKey: 'booked_by_user_id', as: 'BookedBy' });
+Booking.belongsTo(User, { foreignKey: 'approved_by_user_id', as: 'ApprovedBy' });
+Booking.belongsTo(User, { foreignKey: 'rejected_by_user_id', as: 'RejectedBy' });
 
 // 8. Maintenance Requests
 Organization.hasMany(MaintenanceRequest, { foreignKey: 'organization_id', onDelete: 'CASCADE' });

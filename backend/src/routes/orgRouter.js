@@ -17,7 +17,7 @@ router.post('/organizations', authenticateToken, createOrg);
 router.get('/organizations', authenticateToken, listOrgs);
 
 // Plan-compliant clean context paths (recommended)
-router.get('/org/members', authenticateToken, requireOrganizationContext, requireRole(['Admin']), listMembers);
+router.get('/org/members', authenticateToken, requireOrganizationContext, requireRole(['Admin', 'Asset Manager']), listMembers);
 router.post('/org/members/invite', authenticateToken, requireOrganizationContext, requireRole(['Admin']), inviteMember);
 router.patch('/org/members/:userId', authenticateToken, requireOrganizationContext, requireRole(['Admin']), updateMember);
 router.patch('/org/members/:userId/suspend', authenticateToken, requireOrganizationContext, requireRole(['Admin']), suspendMember);
