@@ -18,10 +18,14 @@ import auditRouter from './routes/auditRouter.js';
 import notificationRouter from './routes/notificationRouter.js';
 import logRouter from './routes/logRouter.js';
 import dashboardRouter from './routes/dashboardRouter.js';
+import reportsRouter from './routes/reportsRouter.js';
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Swagger UI Docs route
@@ -45,6 +49,7 @@ app.use('/api', auditRouter);
 app.use('/api', notificationRouter);
 app.use('/api', logRouter);
 app.use('/api', dashboardRouter);
+app.use('/api', reportsRouter);
 
 // Sync database on startup
 export const syncDatabase = async () => {

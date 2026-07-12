@@ -111,10 +111,7 @@ AuditItem.belongsTo(Asset, { foreignKey: 'asset_tag', targetKey: 'tag', as: 'Ass
 User.hasMany(AuditItem, { foreignKey: 'verified_by_user_id', onDelete: 'SET NULL' });
 AuditItem.belongsTo(User, { foreignKey: 'verified_by_user_id', as: 'VerifiedBy' });
 
-AuditItem.belongsTo(User, { foreignKey: 'added_by', as: 'AddedBy' });
-AuditItem.belongsTo(User, { foreignKey: 'resolution_by', as: 'ResolvedBy' });
-
-// 10. Transfer Requests
+// 10. Transfer Requests (Plan: Asset_Transfers table)
 Organization.hasMany(TransferRequest, { foreignKey: 'organization_id', onDelete: 'CASCADE' });
 TransferRequest.belongsTo(Organization, { foreignKey: 'organization_id' });
 
@@ -124,8 +121,12 @@ TransferRequest.belongsTo(Asset, { foreignKey: 'asset_tag', targetKey: 'tag', as
 User.hasMany(TransferRequest, { foreignKey: 'requested_by_user_id', onDelete: 'CASCADE' });
 TransferRequest.belongsTo(User, { foreignKey: 'requested_by_user_id', as: 'Requester' });
 
-User.hasMany(TransferRequest, { foreignKey: 'target_user_id', onDelete: 'CASCADE' });
-TransferRequest.belongsTo(User, { foreignKey: 'target_user_id', as: 'TargetUser' });
+User.hasMany(TransferRequest, { foreignKey: 'current_holder_id', onDelete: 'CASCADE' });
+TransferRequest.belongsTo(User, { foreignKey: 'current_holder_id', as: 'CurrentHolder' });
+
+User.hasMany(TransferRequest, { foreignKey: 'requested_new_holder_id', onDelete: 'CASCADE' });
+TransferRequest.belongsTo(User, { foreignKey: 'requested_new_holder_id', as: 'RequestedNewHolder' });
+
 
 // 11. Notifications
 Organization.hasMany(Notification, { foreignKey: 'organization_id', onDelete: 'CASCADE' });

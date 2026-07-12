@@ -23,9 +23,8 @@ import { OrganizationSetup } from './pages/OrganizationSetup'
 import { Dashboard } from './pages/Dashboard'
 import { AssetDirectory } from './pages/AssetDirectory'
 import { AssetDetail } from './pages/AssetDetail'
-import { Bookings } from './pages/Bookings'
-import { Maintenance } from './pages/Maintenance'
-import { ActivityLog } from './pages/ActivityLog'
+import { Allocations } from './pages/Allocations'
+import { Reports } from './pages/Reports'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,16 +78,12 @@ export default function App() {
             {/* Placeholder routes for sidebar nav */}
             <Route path="/assets" element={<AssetDirectory />} />
             <Route path="/assets/:tag" element={<AssetDetail />} />
-            <Route path="/allocations" element={<PlaceholderPage title="Allocations" />} />
-            <Route path="/bookings" element={<Bookings />} />
-            <Route path="/bookings/approvals" element={<Bookings />} />
-            <Route path="/bookings/my" element={<Bookings />} />
-            <Route path="/bookings/:assetTag" element={<Bookings />} />
-            <Route path="/maintenance" element={<Maintenance />} />
-            <Route path="/maintenance/list" element={<Maintenance />} />
+            <Route path="/allocations" element={<Allocations />} />
+            <Route path="/bookings" element={<PlaceholderPage title="Bookings" />} />
+            <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" />} />
             <Route path="/audit" element={<PlaceholderPage title="Audit" />} />
-            <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
-            <Route path="/activity-log" element={<ActivityLog />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/activity-log" element={<PlaceholderPage title="Activity Log" />} />
             <Route path="/organization-setup" element={<OrganizationSetup />} />
             <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
           </Route>

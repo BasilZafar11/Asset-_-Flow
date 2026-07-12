@@ -15,8 +15,12 @@ const Allocation = sequelize.define('Allocation', {
     type: DataTypes.ENUM('Active', 'Returned'),
     defaultValue: 'Active'
   },
+  return_condition: {
+    type: DataTypes.ENUM('Good', 'Minor Wear', 'Damaged'),
+    allowNull: true
+  },
   notes: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true
   }
 }, {
