@@ -1,122 +1,105 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-function App() {
-  const [count, setCount] = useState(0)
+// Layouts
+import { AuthLayout } from './components/layout/AuthLayout'
+import { DashboardLayout } from './components/layout/DashboardLayout'
 
+// Guards
+import { GuestGuard } from './components/guards/GuestGuard'
+import { AuthGuard } from './components/guards/AuthGuard'
+import { WorkspaceGuard } from './components/guards/WorkspaceGuard'
+
+// Auth Pages
+import { Login } from './pages/auth/Login'
+import { Signup } from './pages/auth/Signup'
+import { ForgotPassword } from './pages/auth/ForgotPassword'
+import { ResetPassword } from './pages/auth/ResetPassword'
+import { Workspaces } from './pages/auth/Workspaces'
+
+import { OrganizationSetup } from './pages/OrganizationSetup'
+
+// App Pages
+import { Dashboard } from './pages/Dashboard'
+import { AssetDirectory } from './pages/AssetDirectory'
+import { AssetDetail } from './pages/AssetDetail'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: true,
+    },
+  },
+})
+
+export default function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          {/* Auth routes — guest only */}
+          <Route
+            element={
+              <GuestGuard>
+                <AuthLayout />
+              </GuestGuard>
+            }
+          >
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+          </Route>
 
-      <div className="ticks"></div>
+          {/* Workspace selector — auth required */}
+          <Route
+            path="/workspaces"
+            element={
+              <AuthGuard>
+                <Workspaces />
+              </AuthGuard>
+            }
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {/* Dashboard shell — auth + workspace required */}
+          <Route
+            element={
+              <WorkspaceGuard>
+                <DashboardLayout />
+              </WorkspaceGuard>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            {/* Placeholder routes for sidebar nav */}
+            <Route path="/assets" element={<AssetDirectory />} />
+            <Route path="/assets/:tag" element={<AssetDetail />} />
+            <Route path="/allocations" element={<PlaceholderPage title="Allocations" />} />
+            <Route path="/bookings" element={<PlaceholderPage title="Bookings" />} />
+            <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" />} />
+            <Route path="/audit" element={<PlaceholderPage title="Audit" />} />
+            <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
+            <Route path="/activity-log" element={<PlaceholderPage title="Activity Log" />} />
+            <Route path="/organization-setup" element={<OrganizationSetup />} />
+            <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+          </Route>
+
+          {/* Default redirect */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }
 
-export default App
+/** Temporary placeholder for unbuilt pages */
+function PlaceholderPage({ title }) {
+  return (
+    <div className="p-6">
+      <h1 className="text-page-title text-neutral-900">{title}</h1>
+      <p className="text-sm text-neutral-500 mt-1">This page is under construction.</p>
+    </div>
+  )
+}

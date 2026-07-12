@@ -25,3 +25,6 @@ frontend/*.local
 # Operating System files
 .DS_Store
 Thumbs.db
+
+# Plans directory
+plans/
