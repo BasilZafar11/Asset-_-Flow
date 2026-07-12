@@ -1,0 +1,27 @@
+# Python bytecode & cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.history/
+
+# Environment configurations (Keep your MySQL passwords safe!)
+.env
+.env.*
+env/
+venv/
+
+# Database files
+*.db
+*.sqlite3
+
+# Node / React Frontend dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
+# Operating System files
+.DS_Store
+Thumbs.db
