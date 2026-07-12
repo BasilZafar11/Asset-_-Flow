@@ -20,8 +20,20 @@ const AuditCycle = sequelize.define('AuditCycle', {
     allowNull: false
   },
   status: {
-    type: DataTypes.ENUM('Draft', 'Active', 'Completed'),
+    type: DataTypes.ENUM('Draft', 'Active', 'Closed'),
     defaultValue: 'Draft'
+  },
+  created_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  closed_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  closed_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'Audit_Cycles',

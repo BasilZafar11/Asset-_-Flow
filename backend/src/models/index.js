@@ -12,6 +12,7 @@ import Booking from './Booking.js';
 import MaintenanceRequest from './MaintenanceRequest.js';
 import AuditCycle from './AuditCycle.js';
 import AuditItem from './AuditItem.js';
+import AuditAuditor from './AuditAuditor.js';
 import TransferRequest from './TransferRequest.js';
 import Notification from './Notification.js';
 import SystemActivityLog from './SystemActivityLog.js';
@@ -92,6 +93,13 @@ AuditCycle.belongsTo(Organization, { foreignKey: 'organization_id' });
 Department.hasMany(AuditCycle, { foreignKey: 'target_department_id', onDelete: 'CASCADE' });
 AuditCycle.belongsTo(Department, { foreignKey: 'target_department_id', as: 'TargetDepartment' });
 
+AuditCycle.belongsTo(User, { foreignKey: 'created_by', as: 'CreatedBy' });
+AuditCycle.belongsTo(User, { foreignKey: 'closed_by', as: 'ClosedBy' });
+
+AuditCycle.hasMany(AuditAuditor, { foreignKey: 'audit_cycle_id', as: 'Auditors' });
+AuditAuditor.belongsTo(AuditCycle, { foreignKey: 'audit_cycle_id' });
+AuditAuditor.belongsTo(User, { foreignKey: 'user_id', as: 'User' });
+
 AuditCycle.hasMany(AuditItem, { foreignKey: 'audit_cycle_id', onDelete: 'CASCADE' });
 AuditItem.belongsTo(AuditCycle, { foreignKey: 'audit_cycle_id' });
 
@@ -100,6 +108,9 @@ AuditItem.belongsTo(Asset, { foreignKey: 'asset_tag', targetKey: 'tag', as: 'Ass
 
 User.hasMany(AuditItem, { foreignKey: 'verified_by_user_id', onDelete: 'SET NULL' });
 AuditItem.belongsTo(User, { foreignKey: 'verified_by_user_id', as: 'VerifiedBy' });
+
+AuditItem.belongsTo(User, { foreignKey: 'added_by', as: 'AddedBy' });
+AuditItem.belongsTo(User, { foreignKey: 'resolution_by', as: 'ResolvedBy' });
 
 // 10. Transfer Requests
 Organization.hasMany(TransferRequest, { foreignKey: 'organization_id', onDelete: 'CASCADE' });
@@ -141,6 +152,7 @@ const db = {
   MaintenanceRequest,
   AuditCycle,
   AuditItem,
+  AuditAuditor,
   TransferRequest,
   Notification,
   SystemActivityLog
@@ -161,6 +173,7 @@ export {
   MaintenanceRequest,
   AuditCycle,
   AuditItem,
+  AuditAuditor,
   TransferRequest,
   Notification,
   SystemActivityLog

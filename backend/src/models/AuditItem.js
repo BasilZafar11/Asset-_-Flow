@@ -14,6 +14,22 @@ const AuditItem = sequelize.define('AuditItem', {
   notes: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  discrepancy_resolution: {
+    type: DataTypes.ENUM('Confirmed', 'Dismissed'),
+    allowNull: true
+  },
+  resolution_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  verified_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  added_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
 }, {
   tableName: 'Audit_Items',

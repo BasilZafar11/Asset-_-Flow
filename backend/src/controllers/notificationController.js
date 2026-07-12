@@ -1,21 +1,48 @@
 import { Notification } from '../models/index.js';
 
-export const listNotifications = async (req, res) => {
+/**
+ * GET /notifications/recent
+ * Returns 5 most recent notifications for current user in current org
+ */
+export const getRecentNotifications = async (req, res) => {
   const orgId = req.orgMember.organization_id;
 
   try {
     const notifications = await Notification.findAll({
       where: { organization_id: orgId, user_id: req.user.id },
-      order: [['created_at', 'DESC']]
+      order: [['created_at', 'DESC']],
+      limit: 5
     });
     return res.json(notifications);
   } catch (err) {
-    console.error('Error fetching notifications:', err);
+    console.error('Error fetching recent notifications:', err);
     return res.status(500).json({ error: 'Internal server error fetching notifications.' });
   }
 };
 
-export const readNotification = async (req, res) => {
+/**
+ * GET /notifications/unread-count
+ * Count of unread notifications for current user in current org
+ */
+export const getUnreadCount = async (req, res) => {
+  const orgId = req.orgMember.organization_id;
+
+  try {
+    const count = await Notification.count({
+      where: { organization_id: orgId, user_id: req.user.id, is_read: false }
+    });
+    return res.json({ count });
+  } catch (err) {
+    console.error('Error fetching unread count:', err);
+    return res.status(500).json({ error: 'Internal server error fetching unread count.' });
+  }
+};
+
+/**
+ * PUT /notifications/:id/read
+ * Mark single notification as read
+ */
+export const markAsRead = async (req, res) => {
   const orgId = req.orgMember.organization_id;
   const notifId = parseInt(req.params.id, 10);
 
@@ -39,5 +66,25 @@ export const readNotification = async (req, res) => {
   } catch (err) {
     console.error('Error marking notification as read:', err);
     return res.status(500).json({ error: 'Internal server error processing notification.' });
+  }
+};
+
+/**
+ * PUT /notifications/mark-all-read
+ * Mark all unread notifications as read for current user in current org
+ */
+export const markAllAsRead = async (req, res) => {
+  const orgId = req.orgMember.organization_id;
+
+  try {
+    const [count] = await Notification.update(
+      { is_read: true },
+      { where: { organization_id: orgId, user_id: req.user.id, is_read: false } }
+    );
+
+    return res.json({ message: 'All notifications marked as read.', count });
+  } catch (err) {
+    console.error('Error marking all notifications as read:', err);
+    return res.status(500).json({ error: 'Internal server error processing notifications.' });
   }
 };
